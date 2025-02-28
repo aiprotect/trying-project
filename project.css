@@ -1,0 +1,161 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    height: 100vh;
+    background-image: radial-gradient(circle at center, #385300, #212900);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: backgroundAnimation 10s ease infinite;
+}
+
+@keyframes backgroundAnimation {
+    0% {
+        background-color: #385300;
+    }
+    50% {
+        background-color: #212900;
+    }
+    100% {
+        background-color: #385300;
+    }
+}
+
+.counter {
+    background: linear-gradient(135deg, #ff6b6b, #f7b733, #6a82fb, #fc5c7d);
+    width: 480px;
+    height: 620px;
+    border-radius: 30px;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3), 0 15px 30px rgba(0, 0, 0, 0.2); /* Added shadow */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+
+.counter:hover {
+    transform: scale(1.05); /* Slightly increased scaling for a more pronounced effect */
+}
+
+.counter_title {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    width: 100%;
+    text-align: center;
+    line-height: 1.2;
+    font-weight: 600;
+    font-size: 36px;
+    margin-top: 40px;
+    background-color: #1d2507;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: titleAnimation 3s ease infinite;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Added text shadow */
+}
+
+@keyframes titleAnimation {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+.counter_value {
+    color: #1d2507;
+    font-size: 180px;
+    font-weight: 700;
+    margin: 20px 0;
+    transition: color 0.3s ease; /* Smooth transition for changes */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Added text shadow */
+}
+
+.counter_reset-button {
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    outline: none;
+}
+
+.counter_reset-icon {
+    padding: 20px;
+    opacity: 0.6;
+    font-size: 40px;
+    transition: opacity 0.4s;
+}
+
+.counter_reset-icon:hover {
+    opacity: 1;
+}
+
+.counter_buttons {
+    background-color: rgba(29, 37, 7, 0.85);
+    height: 120px;
+    width: 100%;
+    margin-top: auto;
+    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+    display: flex;
+}
+
+.counter_icon {
+    color: #fe0094;
+    opacity: 0.9;
+    font-size: 40px;
+}
+
+.counter_button {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Added transform transition */
+}
+
+.counter_button:hover {
+    background: linear-gradient(135deg, #ff7e5f, #feb47b); /* Beautiful gradient */
+    cursor: pointer;
+    transform: translateY(-2px); /* Lift effect on hover */
+}
+
+.counter_button--increase,
+.counter_button--decrease {
+    background-color: #ff6b6b;
+    border-left: 1px solid rgba(189, 254, 0, 0.15);
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2); /* Added shadow */
+}
+
+/* Pulsing animation */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Title Class */
+.title-class {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 180px;
+    color: rgb(206, 16, 16); /* Changed to green */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Added shadow */
+}
+.counter_warning {
+    font-size: 36px;
+    margin-top: 40px;
+    background-color: rgb(206, 16, 16)
+    }

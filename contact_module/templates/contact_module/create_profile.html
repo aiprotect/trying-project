@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+
+{% block title %}
+تماس با ما
+{% endblock %}
+
+
+{% block content %}
+<div id="contact-page" class="container">
+    <div class="bg">
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="contact-form">
+                    <h2 class="titmessage-center">با ما در ارتباط باشیـد</h2>
+                    <div class="status alert alert-success" style="display: none"></div>
+                    <form id="main-contact-form" class="contact-form row" enctype="multipart/form-data"
+                    action="{% url 'create-profile-page' %}" method="post" novalidate>
+                    {% csrf_token %}
+                    <!-- <input type="file" name="image">
+                     -->
+                     {{form}}
+                        <div class="form-group col-md-12">
+                            <div class="button-container">
+                                <button type="submit" class="pull-left center-button">ارسال پیام</button>
+                            </div>
+                        </div>
+                        
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

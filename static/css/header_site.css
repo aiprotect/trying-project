@@ -1,0 +1,272 @@
+        /* تنظیمات پایه و متغیرها */
+        :root {
+            --primary: #6a11cb;
+            --primary-light: #9b5de5;
+            --secondary: #2575fc;
+            --text: #2d3748;
+            --text-light: #718096;
+            --border: #e2e8f0;
+            --white: #ffffff;
+            --gray-100: #f7fafc;
+            --error: #e53e3e;
+            --shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            --transition: all 0.2s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        /* ساختار اصلی هدر */
+        .main-header {
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: auto;
+            padding: 0.5rem 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        /* بخش بالایی هدر */
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.5rem 0;
+        }
+
+        /* لوگو و برند */
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+        }
+
+        .logo img {
+            height: 2rem;
+        }
+
+        .logo span {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        /* بخش جستجو */
+        .search-container {
+            flex: 1;
+            max-width: 500px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 0.5rem 2rem 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 1.5rem;
+            font-size: 0.9rem;
+            background-color: var(--gray-100);
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: var(--white);
+            box-shadow: 0 0 0 2px rgba(106, 17, 203, 0.1);
+        }
+
+        .search-btn {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        /* بخش کاربر و اقدامات */
+        .user-section {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        /* حالت کاربر وارد شده */
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-avatar {
+            width: 2.25rem;
+            height: 2.25rem;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--border);
+            transition: var(--transition);
+        }
+
+        .user-avatar:hover {
+            border-color: var(--primary);
+        }
+
+        .user-name {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        /* حالت کاربر وارد نشده */
+        .auth-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .auth-button {
+            padding: 0.5rem 1rem;
+            border-radius: 1.25rem;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .login-btn {
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+        }
+
+        .login-btn:hover {
+            background-color: rgba(106, 17, 203, 0.05);
+        }
+
+        .register-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: var(--white);
+            border: none;
+        }
+
+        /* آیکون‌های اقدامات */
+        .action-icons {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .action-icon {
+            position: relative;
+            width: 2.25rem;
+            height: 2.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: var(--text);
+            font-size: 1.1rem;
+            transition: var(--transition);
+        }
+
+        .action-icon:hover {
+            color: var(--primary);
+            background-color: rgba(106, 17, 203, 0.05);
+        }
+
+        .badge {
+            position: absolute;
+            top: -0.25rem;
+            left: -0.25rem;
+            background-color: var(--error);
+            color: var(--white);
+            border-radius: 50%;
+            width: 1.1rem;
+            height: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.6rem;
+            font-weight: bold;
+        }
+
+        /* منوی اصلی */
+        .main-nav {
+            border-top: 1px solid var(--border);
+            padding: 0.5rem 0;
+            margin-top: 0.5rem;
+        }
+
+        .nav-list {
+            display: flex;
+            list-style: none;
+            gap: 1.25rem;
+            overflow-x: auto;
+            padding: 0.25rem 0;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            font-weight: 500;
+            padding: 0.25rem 0;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            position: relative;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary);
+        }
+
+        /* رسپانسیو */
+        @media (max-width: 768px) {
+            .header-top {
+                flex-wrap: wrap;
+            }
+
+            .search-container {
+                order: 3;
+                width: 100%;
+                margin-top: 0.5rem;
+            }
+
+            .nav-list {
+                gap: 1rem;
+            }
+        }

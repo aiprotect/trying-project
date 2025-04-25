@@ -1,0 +1,425 @@
+{% extends 'base.html'%}
+{% load poll_extras %}
+
+{% block title%}لیست محصولات | دیجی کالا {% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/product_list.css">
+<link rel="stylesheet" href="/static/css/all.css">
+<style>
+    /* Reset & Base Styles */
+    :root {
+      --sidebar-width: 260px;
+      --content-gap: 30px;
+      --border-color: #e1e3e6;
+      --primary-color: #3a86ff;
+      --hover-bg: #f8f9fa;
+      --header-height: 60px;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      direction: rtl;
+    }
+  
+    /* Main Layout Structure */
+    .main-content {
+      position: relative;
+    }
+  
+    .main-content .container {
+      max-width: 100%;
+      padding: 0;
+      margin: 0 auto;
+    }
+  
+    .product-layout {
+      display: flex;
+      position: relative;
+      gap: var(--content-gap);
+      align-items: flex-start;
+    }
+  
+    /* Fixed Sidebar */
+    .filter-sidebar {
+      width: var(--sidebar-width);
+      position: -webkit-sticky; /* Safari */
+      position: sticky;
+      top: calc(var(--header-height) + 20px); /* Below header */
+      right: 0;
+      height: calc(100vh - var(--header-height) - 40px); /* Full height minus header */
+      padding: 20px 15px;
+      margin-left: auto;
+      background: #fff;
+      border-right: 1px solid var(--border-color);
+      box-shadow: -5px 0 15px rgba(0,0,0,0.03);
+      z-index: 100;
+      border-radius: 8px 0 0 8px;
+      overflow-y: auto; /* Scrollable if content is long */
+      overscroll-behavior: contain; /* Prevent page scroll when reaching end */
+    }
+  
+    .filter-section {
+      margin-bottom: 25px;
+      padding: 15px;
+      background: #fefefe;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
+  
+    .filter-title {
+      font-size: 1.1rem;
+      color: #2c3e50;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed var(--border-color);
+      position: relative;
+    }
+  
+    .filter-title::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      bottom: -1px;
+      width: 50px;
+      height: 2px;
+      background: var(--primary-color);
+    }
+  
+    /* Enhanced Category Links */
+    .category-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+  
+    .category-link {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 15px;
+      margin-bottom: 8px;
+      color: #34495e;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  
+    .category-link:hover,
+    .category-link.active {
+      background: var(--hover-bg);
+      color: var(--primary-color);
+      transform: translateX(-3px);
+    }
+  
+    .product-count {
+      background: #f1f2f6;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+    }
+  
+    /* Content Area */
+    .product-listing {
+      flex: 1;
+      padding: 0 15px;
+      min-width: 0; /* Fix flexbox overflow */
+    }
+  
+    /* High Quality Images */
+    .product-image {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      aspect-ratio: 1/1;
+    }
+  
+    .product-image img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease, filter 0.3s ease;
+      backface-visibility: hidden;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+    }
+  
+    .product-card:hover .product-image img {
+      transform: scale(1.05);
+      filter: brightness(1.02) contrast(1.05);
+    }
+  
+    /* Responsive Design */
+    @media (max-width: 1200px) {
+      :root {
+        --sidebar-width: 240px;
+        --content-gap: 20px;
+      }
+    }
+  
+    @media (max-width: 992px) {
+      .product-layout {
+        flex-direction: column;
+      }
+      
+      .filter-sidebar {
+        width: 100%;
+        position: relative;
+        top: auto !important;
+        height: auto;
+        max-height: 400px;
+        margin-bottom: 30px;
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        border-radius: 0;
+      }
+      
+      .product-listing {
+        width: 100%;
+        padding: 0;
+      }
+    }
+  
+    @media (max-width: 768px) {
+      :root {
+        --content-gap: 15px;
+        --header-height: 50px;
+      }
+      
+      .filter-section {
+        padding: 12px;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/product_list.js"></script>
+{% endblock %}
+
+{% block content%}
+<!-- هدر صفحه -->
+<header class="page-header">
+    <div class="container">
+        <div class="header-content">
+            <h1 class="page-title">محصولات <span class="title-accent">فروشگاه</span></h1>
+            <nav class="breadcrumb">
+                <a href="/" class="breadcrumb-link">
+                    <i class="fas fa-home"></i>
+                    خانه
+                </a>
+                <span class="separator">/</span>
+                <span class="current">محصولات</span>
+            </nav>
+        </div>
+    </div>
+</header>
+
+<!-- بخش اصلی -->
+<main class="main-content">
+    <div class="container">
+        <div class="product-layout">
+            <!-- سایدبار فیلترها -->
+            <aside class="filter-sidebar">
+                <div class="filter-section">
+                    <h3 class="filter-title">
+                        <i class="fas fa-list"></i>
+                        دسته‌بندی‌ها
+                    </h3>
+                    <ul class="category-list">
+                        <li class="active">
+                            <a href="#" class="category-link">
+                                <span class="category-name">همه محصولات</span>
+                                <span class="product-count">120</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="category-link">
+                                <span class="category-name">{{ products.category }}</span>
+                                <span class="product-count">45</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="category-link">
+                                <span class="category-name">پوشاک</span>
+                                <span class="product-count">32</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="category-link">
+                                <span class="category-name">لوازم خانگی</span>
+                                <span class="product-count">28</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="category-link">
+                                <span class="category-name">کتاب و لوازم تحریر</span>
+                                <span class="product-count">15</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="filter-section">
+                    <h3 class="filter-title">
+                        <i class="fas fa-tags"></i>
+                        فیلترها
+                    </h3>
+                    <div class="filter-option">
+                        <a href="#" class="filter-link active">
+                            <span class="new-badge">
+                                <i class="fas fa-certificate"></i>
+                            </span>
+                            محصولات جدید
+                        </a>
+                        <a href="#" class="filter-link">
+                            <span class="new-badge">
+                                <i class="fas fa-fire"></i>
+                            </span>
+                            پرفروش‌ترین‌ها
+                        </a>
+                        <a href="#" class="filter-link">
+                            <span class="new-badge">
+                                <i class="fas fa-percentage"></i>
+                            </span>
+                            تخفیف‌دارها
+                        </a>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- محتوای محصولات -->
+            <section class="product-listing">
+                <!-- هدر لیست محصولات -->
+                <div class="listing-header">
+                    <div class="results-count">
+                        <span>24</span> محصول یافت شد
+                    </div>
+                    <div class="sort-options">
+                        <select class="sort-select">
+                            <option value="">مرتب‌سازی پیش‌فرض</option>
+                            <option value="newest">جدیدترین</option>
+                            <option value="price-low">ارزان‌ترین</option>
+                            <option value="price-high">گران‌ترین</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- لیست محصولات -->
+
+                <div class="product-grid">
+                    {% for product in products%}
+
+                    <div class="product-card">
+                        <div class="product-badges">
+                            <span class="badge new">
+                                <i class="fas fa-bolt"></i>
+                                جدید
+                            </span>
+                            <span class="badge discount">%15 تخفیف</span>
+                        </div>
+
+                        <div class="product-image">
+                            <a href="{{ product.get_absolute_url }}">
+                                <picture>
+                                    <img src="{{ product.main_image.url }}" alt="هدفون بی‌سیم">
+                                </picture>
+                            </a>
+                            <div class="image-overlay"></div>
+                            <div class="product-actions">
+                                <button class="action-btn wishlist-btn">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                                <a href="#">
+                                    <button class="action-btn quick-view-btn">
+                                        <i class="far fa-eye"></i>
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+
+                        <div class="product-info">
+                            <div class="product-meta">
+                                <span class="product-category">
+                                    <i class="{{product.category.icon}}"></i>
+                                    {{ product.category }}
+                                </span>
+                                <span class="product-rating">
+                                    <span>4.5</span>
+                                    <i class="fas fa-star"></i>
+                                </span>
+                            </div>
+
+                            <h3 class="product-title">
+                                <a href="{{ product.get_absolute_url }}">{{ product.title }}</a>
+                            </h3>
+
+                            <div class="price-container">
+                                {% if product.has_discount %}
+                                <div class="discount-price-group">
+                                    <span class="final-price">{{ product.final_price|three_digits_currency }} </span>
+                                    <span class="discount-percent">%{{ product.discount_percentage|floatformat:"0"}}</span>
+                                </div>
+                                {% else %}
+                                <div class="normal-price">
+                                    <span class="final-price">{{ product.price|three_digits_currency }} </span>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="stock-status">
+                                {% if product.stock_quantity > 0 %}
+                                {% if product.stock_quantity <= product.low_stock_threshold %} <div
+                                    class="stock-indicator low-stock"
+                                    data-tooltip="تنها {{ product.stock_quantity }} عدد باقی مانده">
+                                    <span class="indicator-dot"></span>
+                                    <span class="indicator-text">آخرین موجودی</span>
+                            </div>
+                            {% else %}
+                            <div class="stock-indicator in-stock">
+                                <span class="indicator-dot"></span>
+                                <span class="indicator-text">موجود</span>
+                            </div>
+                            {% endif %}
+                            {% else %}
+                            {% if product.backorder_allowed %}
+                            <div class="stock-indicator pre-order" data-tooltip="ارسال پس از 3-5 روز کاری">
+                                <span class="indicator-dot"></span>
+                                <span class="indicator-text">پیش‌خرید</span>
+                            </div>
+                            {% else %}
+                            <div class="stock-indicator out-of-stock">
+                                <span class="indicator-dot"></span>
+                                <span class="indicator-text">ناموجود</span>
+                            </div>
+                            {% endif %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+        </div>
+
+        <!-- صفحه‌بندی -->
+        <nav class="pagination">
+            <a href="#" class="page-link prev">
+                <i class="fas fa-chevron-right"></i>
+                قبلی
+            </a>
+            <a href="#" class="page-link">1</a>
+            <span class="page-link active">2</span>
+            <a href="#" class="page-link">3</a>
+            <a href="#" class="page-link">4</a>
+            <a href="#" class="page-link next">
+                بعدی
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </nav>
+        </section>
+    </div>
+    </div>
+</main>
+
+
+{%endblock%}

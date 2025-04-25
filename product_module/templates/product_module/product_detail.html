@@ -1,0 +1,2381 @@
+{% extends 'base.html' %}
+{% load poll_extras %}
+
+{% block title %} {{ product.title }} {% endblock %}
+
+{% block extra_css%}
+<link href="https://fonts.googleapis.com/css2?family=IRANSans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/product_detail.css">
+
+<style>
+.product-availability {
+    font-family: 'Segoe UI', Roboto, -apple-system, sans-serif;
+    margin: 1rem 0;
+}
+
+.availability-card {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border: 1px solid #e0e0e0;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.status-indicator {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    margin-left: 8px;
+}
+
+.status-dot {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.pulse-animation {
+    display: block;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    70% {
+        transform: scale(1.3);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+}
+
+.status-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.status-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+.status-description {
+    font-size: 12px;
+    color: #616161;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    margin-right: 4px;
+}
+
+/* حالت‌های مختلف */
+.in-stock {
+    border-right: 3px solid #4CAF50;
+}
+.in-stock .status-dot {
+    background-color: #4CAF50;
+}
+.in-stock .status-badge {
+    color: #4CAF50;
+}
+
+.low-stock {
+    border-right: 3px solid #FF9800;
+}
+.low-stock .status-dot {
+    background-color: #FF9800;
+}
+.low-stock .status-badge {
+    color: #FF9800;
+}
+.low-stock .pulse-animation {
+    background-color: #FF9800;
+}
+
+.pre-order {
+    border-right: 3px solid #2196F3;
+}
+.pre-order .status-dot {
+    background-color: #2196F3;
+}
+.pre-order .status-badge {
+    color: #2196F3;
+}
+
+.out-of-stock {
+    border-right: 3px solid #F44336;
+}
+.out-of-stock .status-dot {
+    background-color: #F44336;
+}
+.out-of-stock .status-badge {
+    color: #F44336;
+}
+.product-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    overflow: hidden;
+    min-width: 180px;
+}
+
+.action-btn .btn-icon {
+    margin-left: 8px;
+    font-size: 16px;
+}
+
+/* دکمه اصلی (سبد خرید) */
+.action-btn.primary {
+    background-color: #4CAF50;
+    color: white;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+}
+
+.action-btn.primary:hover {
+    background-color: #3d8b40;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4);
+}
+
+/* دکمه خرید سریع */
+.action-btn.success {
+    background-color: #2196F3;
+    color: white;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.3);
+}
+
+.action-btn.success:hover {
+    background-color: #0b7dda;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4);
+}
+
+/* دکمه علاقه‌مندی‌ها */
+.action-btn.outline {
+    background-color: transparent;
+    color: #555;
+    border: 1px solid #ddd;
+}
+
+.action-btn.outline:hover {
+    background-color: #f9f9f9;
+    border-color: #2196F3;
+    color: #2196F3;
+}
+
+/* حالت غیرفعال */
+.action-btn.disabled {
+    background-color: #f5f5f5;
+    color: #999;
+    cursor: not-allowed;
+    box-shadow: none;
+    pointer-events: none;
+}
+
+.action-btn.disabled .btn-icon {
+    opacity: 0.7;
+}
+
+.stock-alert {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    right: 0;
+    font-size: 11px;
+    color: #f44336;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.action-btn.disabled:hover .stock-alert {
+    opacity: 1;
+}
+
+/* انیمیشن لودر */
+.btn-loader {
+    display: none;
+    position: absolute;
+    right: 10px;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* افکت کلیک */
+.action-btn:active:not(.disabled) {
+    transform: translateY(0) !important;
+}
+.product-gallery {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.gallery-main {
+    position: relative;
+}
+
+.main-image-container {
+    position: relative;
+    height: 500px;
+    background: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-in;
+}
+
+.main-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.product-badge {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    background: #ff4757;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    z-index: 2;
+}
+
+.gallery-actions {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.gallery-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.gallery-btn:hover {
+    background: white;
+    transform: scale(1.1);
+}
+
+.thumbnail-track {
+    position: relative;
+    padding: 15px 50px;
+}
+
+.thumbnail-container {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    padding-bottom: 5px;
+}
+
+.thumbnail-container::-webkit-scrollbar {
+    display: none;
+}
+
+.thumbnail-item {
+    width: 80px;
+    height: 80px;
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    flex-shrink: 0;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.thumbnail-item.active {
+    border-color: #3498db;
+}
+
+.thumbnail-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.media-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.6);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thumbnail-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: white;
+    border: none;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    cursor: pointer;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thumbnail-nav.prev {
+    left: 10px;
+}
+
+.thumbnail-nav.next {
+    right: 10px;
+}
+
+/* لایتن باکس */
+.lightbox {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.9);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.lightbox.active {
+    display: flex;
+}
+
+.lightbox-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+    text-align: center;
+}
+
+.lightbox-image, 
+.lightbox-video,
+.lightbox-360 {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 8px;
+}
+
+.lightbox-close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 30px;
+    cursor: pointer;
+}
+
+.lightbox-controls {
+    position: absolute;
+    bottom: -50px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+.lightbox-prev, 
+.lightbox-next {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-counter {
+    color: white;
+    font-size: 16px;
+}
+
+/* حالت زوم */
+.main-image-container.zoomed {
+    cursor: grab;
+}
+
+.main-image-container.zoomed .main-image {
+    transform: scale(2);
+    cursor: grab;
+}
+
+.main-image-container.grabbing {
+    cursor: grabbing;
+}
+
+/* واکنش‌گرایی */
+@media (max-width: 768px) {
+    .main-image-container {
+        height: 400px;
+    }
+    
+    .thumbnail-item {
+        width: 70px;
+        height: 70px;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-image-container {
+        height: 300px;
+    }
+    
+    .thumbnail-item {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .thumbnail-track {
+        padding: 10px 40px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/product_detail.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- مسیر ناوبری -->
+<div class="breadcrumb">
+    <div class="container">
+        <ul class="breadcrumb-list">
+            <li class="breadcrumb-item">
+                <a href="{% url 'index-page' %}" class="breadcrumb-link">خانه</a>
+                <span class="breadcrumb-separator">/</span>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="#" class="breadcrumb-link">{{ product.category.parent }}</a>
+                <span class="breadcrumb-separator">/</span>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="#" class="breadcrumb-link">{{ product.category }}</a>
+                <span class="breadcrumb-separator">/</span>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="#" class="breadcrumb-link">{{ product.brand }}</a>
+                <span class="breadcrumb-separator">/</span>
+            </li>
+            <li class="breadcrumb-item">
+                <span class="breadcrumb-link active">{{ product.title }}</span>
+            </li>
+        </ul>
+    </div>
+</div>
+
+
+  <!-- بخش اصلی محصول -->
+  <div class="product-container">
+    <div class="product-gallery">
+        <!-- نمایش اصلی با قابلیت زوم -->
+        <div class="gallery-main">
+            <div class="main-image-container">
+                <img src="{{ product.main_image.url }}" 
+                     alt="{{ product.title }}" 
+                     class="main-image" 
+                     id="main-product-image"
+                     data-zoom-src="{{ product.high_res_image.url }}">
+                
+                <!-- نشانگر وضعیت محصول -->
+                <span class="product-badge">پرفروش</span>
+                
+                <!-- دکمه‌های کنترل -->
+                <div class="gallery-actions">
+                    <button class="gallery-btn zoom-btn" title="بزرگنمایی">
+                        <svg><!-- آیکون ذره بین --></svg>
+                    </button>
+                    <button class="gallery-btn fullscreen-btn" title="تمام صفحه">
+                        <svg><!-- آیکون تمام صفحه --></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- پیش نمایش تصاویر -->
+            <div class="thumbnail-track">
+                <div class="thumbnail-container">
+                    {% for image in product.images.all %}
+                    <div class="thumbnail-item {% if forloop.first %}active{% endif %}" 
+                         data-src="{{ image.url }}"
+                         data-zoom-src="{{ image.high_res_url }}"
+                         data-type="image">
+                        <img src="{{ image.thumbnail_url }}" alt="{{ product.title }}">
+                        {% if image.is_video %}
+                        <div class="media-indicator">
+                            <svg><!-- آیکون پلی --></svg>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    
+                    {% if product.video %}
+                    <div class="thumbnail-item" 
+                         data-src="{{ product.video.url }}"
+                         data-type="video">
+                        <img src="{{ product.video.thumbnail }}" alt="ویدیوی محصول">
+                        <div class="media-indicator">
+                            <svg><!-- آیکون پلی --></svg>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    {% if product.has_360_view %}
+                    <div class="thumbnail-item" 
+                         data-type="360"
+                         data-src="{{ product.360_view_url }}">
+                        <img src="{{ product.360_thumbnail }}" alt="نمایش 360 درجه">
+                        <div class="media-indicator">
+                            <svg><!-- آیکون 360 --></svg>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <button class="thumbnail-nav prev" aria-label="قبلی">
+                    <svg><!-- آیکون فلش چپ --></svg>
+                </button>
+                <button class="thumbnail-nav next" aria-label="بعدی">
+                    <svg><!-- آیکون فلش راست --></svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- لایتن باکس -->
+        <div class="lightbox">
+            <div class="lightbox-content">
+                <button class="lightbox-close">&times;</button>
+                <img class="lightbox-image" src="" alt="">
+                <video class="lightbox-video" controls style="display:none;"></video>
+                <iframe class="lightbox-360" style="display:none;"></iframe>
+                
+                <div class="lightbox-controls">
+                    <button class="lightbox-prev">
+                        <svg><!-- آیکون فلش چپ --></svg>
+                    </button>
+                    <span class="image-counter">1/5</span>
+                    <button class="lightbox-next">
+                        <svg><!-- آیکون فلش راست --></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+      <!-- اطلاعات محصول -->
+      <div class="product-info-wrapper">
+          <div class="product-header">
+              <h1 class="product-title"> {{ product.title }} </h1>
+              <div class="product-subtitle">نسخه  {{ product.sim_number}} با گارانتی رسمی شرکت آسیا تک</div>
+              
+              <div class="product-meta">
+                  <div class="meta-item">
+                      <span class="meta-icon">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="currentColor"/>
+                              <path d="M12.5 7H11V13L16.2 16.2L17 14.9L12.5 12.2V7Z" fill="currentColor"/>
+                          </svg>
+                      </span>
+                      <span class="meta-text">آخرین بروزرسانی: <span class="meta-value">2 ساعت پیش</span></span>
+                  </div>
+                  <div class="meta-item">
+                      <span class="meta-icon">
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M18 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V4C20 2.9 19.1 2 18 2ZM18 20H6V4H18V20Z" fill="currentColor"/>
+                              <path d="M12.01 6C9.79 6 8.02 7.79 8.02 10C8.02 12.21 9.8 14 12.01 14C14.22 14 16 12.21 16 10C16 7.79 14.23 6 12.01 6ZM12 12C10.9 12 10.01 11.11 10.01 10.01C10.01 8.91 10.9 8.02 12 8.02C13.1 8.02 13.99 8.91 13.99 10.01C13.99 11.11 13.1 12 12 12Z" fill="currentColor"/>
+                          </svg>
+                      </span>
+                      <span class="meta-text">کد محصول: <span class="meta-value">{{ product.sku }} </span></span>
+                  </div>
+              </div>
+              
+              <div class="rating-sales-container">
+                  <div class="rating-container">
+                      <div class="stars">
+                          <span class="star filled">★</span>
+                          <span class="star filled">★</span>
+                          <span class="star filled">★</span>
+                          <span class="star filled">★</span>
+                          <span class="star half">★</span>
+                      </div>
+                      <span class="rating-value">4.7</span>
+                      <span class="rating-count">(47 نظر)</span>
+                  </div>
+                  <div class="sales-count">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M16 6C14.36 6 13 7.36 13 9V21H15V9C15 8.45 15.45 8 16 8C16.55 8 17 8.45 17 9V21H19V9C19 7.36 17.64 6 16 6Z" fill="currentColor"/>
+                          <path d="M8 6C6.36 6 5 7.36 5 9V21H7V9C7 8.45 7.45 8 8 8C8.55 8 9 8.45 9 9V21H11V9C11 7.36 9.64 6 8 6Z" fill="currentColor"/>
+                      </svg>
+                      <span class="sales-text">فروخته شده: 1,234 عدد</span>
+                  </div>
+              </div>
+          </div>
+          
+          <!-- وضعیت موجودی -->
+          <div class="availability-card">
+              <div class="availability-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="#4CAF50"/>
+                      <path d="M10 14.17L16.59 7.58L18 9L10 17L6 13L7.41 11.59L10 14.17Z" fill="#4CAF50"/>
+                  </svg>
+              </div>
+              <div class="availability-content">
+                  <div class="availability-title">موجود در انبار دیجی‌کالا</div>
+                  <div class="availability-desc">آماده ارسال از انبار مرکزی (تحویل 24 ساعته در تهران)</div>
+              </div>
+              <div class="availability-stock">
+                  <div class="stock-indicator">
+                      <div class="stock-level high"></div>
+                  </div>
+                  <span class="stock-text">موجودی زیاد</span>
+              </div>
+          </div>
+          
+          <!-- قیمت و تخفیف -->
+          <div class="pricing-section">
+              <div class="price-container">
+                  <div class="original-price">
+                      <span class="price-label">قیمت مصرف‌کننده:</span>
+                      <span class="price-value">{{ product.price | three_digits_currency }}</span>
+                      <span class="currency">تومان</span>
+                  </div>
+                  <div class="discount-badge">
+                      <span class="discount-percent">30%</span>
+                      <span class="discount-text">{{ product.percentage }}</span>
+                  </div>
+              </div>
+              
+              <div class="final-price-container">
+                  <span class="final-price-label">قیمت فروش:</span>
+                  <span class="final-price">{{ product.final_price | three_digits_currency}}</span>
+              </div>
+              
+              <div class="discount-timer">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="#F44336"/>
+                      <path d="M12.5 7H11V13L16.2 16.2L17 14.9L12.5 12.2V7Z" fill="#F44336"/>
+                  </svg>
+                  <span class="timer-text">زمان باقی‌مانده تا پایان تخفیف: <span class="timer-value">12:45:23</span></span>
+              </div>
+              
+              <div class="installment-option">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 4H4C2.89 4 2.01 4.89 2.01 6L2 18C2 19.11 2.89 20 4 20H20C21.11 20 22 19.11 22 18V6C22 4.89 21.11 4 20 4ZM20 18H4V12H20V18ZM20 8H4V6H20V8Z" fill="#2196F3"/>
+                  </svg>
+                  <span class="installment-text">قسطی از <span class="installment-price">5,241,666</span> تومان در 12 ماه</span>
+              </div>
+          </div>
+          
+          <!-- گزینه‌های محصول -->
+          <div class="product-options">
+              <div class="option-group color-options">
+                  <h3 class="option-title">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M17.66 7.93L12 2.27L6.34 7.93C3.22 11.05 3.22 16.12 6.34 19.24C7.9 20.8 9.95 21.58 12 21.58C14.05 21.58 16.1 20.8 17.66 19.24C20.78 16.12 20.78 11.05 17.66 7.93ZM12 19.59C10.4 19.59 8.89 18.98 7.76 17.85C6.62 16.72 6.01 15.2 6.01 13.61C6.01 12.02 6.62 10.5 7.76 9.37L12 5.13L16.24 9.37C17.38 10.5 17.99 12.02 17.99 13.61C17.99 15.2 17.38 16.72 16.24 17.85C15.11 18.98 13.6 19.59 12 19.59Z" fill="currentColor"/>
+                          <path d="M12.0001 10.9299C10.7601 10.9299 9.73007 11.9599 9.73007 13.1999C9.73007 14.4399 10.7601 15.4699 12.0001 15.4699C13.2401 15.4699 14.2701 14.4399 14.2701 13.1999C14.2701 11.9599 13.2401 10.9299 12.0001 10.9299ZM12.0001 13.9199C11.5801 13.9199 11.2301 13.5699 11.2301 13.1499C11.2301 12.7299 11.5801 12.3799 12.0001 12.3799C12.4201 12.3799 12.7701 12.7299 12.7701 13.1499C12.7701 13.5699 12.4201 13.9199 12.0001 13.9199Z" fill="currentColor"/>
+                      </svg>
+                      رنگ
+                  </h3>
+                  <div class="option-values">
+                      <label class="color-option active">
+                          <input type="radio" name="color" value="black" checked>
+                          <span class="color-checkmark" style="background-color: #2c3e50;"></span>
+                          <span class="color-name">مشکی تیتانیوم</span>
+                      </label>
+                      <label class="color-option">
+                          <input type="radio" name="color" value="blue">
+                          <span class="color-checkmark" style="background-color: #3498db;"></span>
+                          <span class="color-name">آبی تیتانیوم</span>
+                      </label>
+                      <label class="color-option">
+                          <input type="radio" name="color" value="white">
+                          <span class="color-checkmark" style="background-color: #ecf0f1;"></span>
+                          <span class="color-name">سفید تیتانیوم</span>
+                      </label>
+                      <label class="color-option">
+                          <input type="radio" name="color" value="gold">
+                          <span class="color-checkmark" style="background: linear-gradient(135deg, #f1c40f 50%, #e67e22 50%);"></span>
+                          <span class="color-name">طلایی تیتانیوم</span>
+                      </label>
+                  </div>
+              </div>
+              
+              <div class="option-group storage-options">
+                  <h3 class="option-title">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M4 4H20V20H4V4ZM6 6V18H18V6H6ZM11 7H13V9H11V7ZM11 10H13V12H11V10ZM11 13H13V15H11V13ZM7 10H9V12H7V10ZM7 13H9V15H7V13ZM7 7H9V9H7V7ZM15 10H17V12H15V10ZM15 13H17V15H15V13ZM15 7H17V9H15V7Z" fill="currentColor"/>
+                      </svg>
+                      حافظه داخلی
+                  </h3>
+                  <div class="option-values">
+                      <label class="storage-option">
+                          <input type="radio" name="storage" value="128">
+                          <span class="storage-checkmark">128GB</span>
+                      </label>
+                      <label class="storage-option active">
+                          <input type="radio" name="storage" value="256" checked>
+                          <span class="storage-checkmark">256GB</span>
+                      </label>
+                      <label class="storage-option">
+                          <input type="radio" name="storage" value="512">
+                          <span class="storage-checkmark">512GB</span>
+                      </label>
+                      <label class="storage-option">
+                          <input type="radio" name="storage" value="1tb">
+                          <span class="storage-checkmark">1TB</span>
+                      </label>
+                  </div>
+              </div>
+              
+              <div class="option-group warranty-options">
+                  <h3 class="option-title">
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM12 11.99H19C18.47 16.11 15.72 19.78 12 20.93V12H5V6.3L12 3.19V11.99Z" fill="currentColor"/>
+                      </svg>
+                      گارانتی
+                  </h3>
+                  <div class="option-values">
+                      <label class="warranty-option active">
+                          <input type="radio" name="warranty" value="official" checked>
+                          <span class="warranty-checkmark">
+                              <span class="warranty-title">گارانتی رسمی آسیا تک</span>
+                              <span class="warranty-duration">18 ماه</span>
+                          </span>
+                      </label>
+                      <label class="warranty-option">
+                          <input type="radio" name="warranty" value="store">
+                          <span class="warranty-checkmark">
+                              <span class="warranty-title">گارانتی فروشگاه</span>
+                              <span class="warranty-duration">12 ماه</span>
+                          </span>
+                      </label>
+                      <label class="warranty-option">
+                          <input type="radio" name="warranty" value="none">
+                          <span class="warranty-checkmark">
+                              <span class="warranty-title">بدون گارانتی</span>
+                              <span class="warranty-duration">-</span>
+                          </span>
+                      </label>
+                  </div>
+              </div>
+          </div>
+          
+          <!-- دکمه‌های اقدام -->
+          <div class="action-buttons">
+              <button class="add-to-cart-btn">
+                  <span class="btn-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M7 18C5.9 18 5.01 18.9 5.01 20C5.01 21.1 5.9 22 7 22C8.1 22 9 21.1 9 20C9 18.9 8.1 18 7 18ZM1 2V4H3L6.6 11.59L5.25 14.04C5.09 14.32 5 14.65 5 15C5 16.1 5.9 17 7 17H19V15H7.42C7.28 15 7.17 14.89 7.17 14.75L7.2 14.63L8.1 13H15.55C16.3 13 16.96 12.59 17.3 11.97L20.88 5.48C20.96 5.34 21 5.17 21 5C21 4.45 20.55 4 20 4H5.21L4.27 2H1ZM17 18C15.9 18 15.01 18.9 15.01 20C15.01 21.1 15.9 22 17 22C18.1 22 19 21.1 19 20C19 18.9 18.1 18 17 18Z" fill="currentColor"/>
+                      </svg>
+                  </span>
+                  <span class="btn-text">افزودن به سبد خرید</span>
+              </button>
+              
+              <button class="buy-now-btn">
+                  <span class="btn-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M18 6H16C16 3.79 14.21 2 12 2C9.79 2 8 3.79 8 6H6C4.9 6 4 6.9 4 8V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V8C20 6.9 19.1 6 18 6ZM12 4C13.1 4 14 4.9 14 6H10C10 4.9 10.9 4 12 4ZM18 20H6V8H8V10C8 10.55 8.45 11 9 11C9.55 11 10 10.55 10 10V8H14V10C14 10.55 14.45 11 15 11C15.55 11 16 10.55 16 10V8H18V20Z" fill="currentColor"/>
+                      </svg>
+                  </span>
+                  <span class="btn-text">خرید اینترنتی</span>
+              </button>
+              
+              <div class="secondary-actions">
+                  <button class="wishlist-btn">
+                      <span class="btn-icon">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 21.35L10.55 20.03C5.4 15.36 2 12.28 2 8.5C2 5.42 4.42 3 7.5 3C9.24 3 10.91 3.81 12 5.09C13.09 3.81 14.76 3 16.5 3C19.58 3 22 5.42 22 8.5C22 12.28 18.6 15.36 13.45 20.03L12 21.35Z" fill="currentColor"/>
+                          </svg>
+                      </span>
+                      <span class="btn-text">لیست دلخواه</span>
+                  </button>
+                  
+                  <button class="compare-btn">
+                      <span class="btn-icon">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M10 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H10C11.1 21 12 20.1 12 19V5C12 3.9 11.1 3 10 3ZM10 19H5V5H10V19ZM19 3H14C12.9 3 12 3.9 12 5V19C12 20.1 12.9 21 14 21H19C20.1 21 21 20.1 21 19V5C21 3.9 20.1 3 19 3ZM19 19H14V5H19V19Z" fill="currentColor"/>
+                          </svg>
+                      </span>
+                      <span class="btn-text">مقایسه</span>
+                  </button>
+                  
+                  <button class="share-btn">
+                      <span class="btn-icon">
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M18 16.08C17.24 16.08 16.56 16.38 16.04 16.85L8.91 12.7C8.96 12.47 9 12.24 9 12C9 11.76 8.96 11.53 8.91 11.3L15.96 7.19C16.5 7.69 17.21 8 18 8C19.66 8 21 6.66 21 5C21 3.34 19.66 2 18 2C16.34 2 15 3.34 15 5C15 5.24 15.04 5.47 15.09 5.7L8.04 9.81C7.5 9.31 6.79 9 6 9C4.34 9 3 10.34 3 12C3 13.66 4.34 15 6 15C6.79 15 7.5 14.69 8.04 14.19L15.16 18.35C15.11 18.56 15.08 18.78 15.08 19C15.08 20.61 16.39 21.92 18 21.92C19.61 21.92 20.92 20.61 20.92 19C20.92 17.39 19.61 16.08 18 16.08Z" fill="currentColor"/>
+                          </svg>
+                      </span>
+                      <span class="btn-text">اشتراک‌گذاری</span>
+                  </button>
+              </div>
+          </div>
+          
+          <!-- خدمات محصول -->
+          <div class="product-services">
+              <div class="service-card">
+                  <div class="service-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM12 11.99H19C18.47 16.11 15.72 19.78 12 20.93V12H5V6.3L12 3.19V11.99Z" fill="#4CAF50"/>
+                      </svg>
+                  </div>
+                  <div class="service-content">
+                      <h4 class="service-title">گارانتی شرکتی</h4>
+                      <p class="service-desc">18 ماه ضمانت سلامت کالا</p>
+                  </div>
+              </div>
+              
+              <div class="service-card">
+                  <div class="service-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M19 7H16V6C16 3.79 14.21 2 12 2C9.79 2 8 3.79 8 6V7H5C3.9 7 3 7.9 3 9V20C3 21.1 3.9 22 5 22H19C20.1 22 21 21.1 21 20V9C21 7.9 20.1 7 19 7ZM10 6C10 4.9 10.9 4 12 4C13.1 4 14 4.9 14 6V7H10V6ZM19 20H5V9H19V20Z" fill="#2196F3"/>
+                          <path d="M12 13C10.9 13 10 13.9 10 15C10 16.1 10.9 17 12 17C13.1 17 14 16.1 14 15C14 13.9 13.1 13 12 13Z" fill="#2196F3"/>
+                      </svg>
+                  </div>
+                  <div class="service-content">
+                      <h4 class="service-title">تحویل اکسپرس</h4>
+                      <p class="service-desc">ارسال در 24 ساعت تهران</p>
+                  </div>
+              </div>
+              
+              <div class="service-card">
+                  <div class="service-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M16 13H17.67C18.4 13 19 12.4 19 11.67V5.33C19 4.6 18.4 4 17.67 4H12.33C11.6 4 11 4.6 11 5.33V7H6.33C5.6 7 5 7.6 5 8.33V14.67C5 15.4 5.6 16 6.33 16H11V18.67C11 19.4 11.6 20 12.33 20H17.67C18.4 20 19 19.4 19 18.67V15H16V13ZM13 6H17V11H13V6ZM6 9H11V14H6V9ZM13 18V13H17V18H13Z" fill="#FF9800"/>
+                      </svg>
+                  </div>
+                  <div class="service-content">
+                      <h4 class="service-title">بازگشت کالا</h4>
+                      <p class="service-desc">۷ روز ضمانت بازگشت</p>
+                  </div>
+              </div>
+              
+              <div class="service-card">
+                  <div class="service-icon">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 20C7.59 20 4 16.41 4 12C4 7.59 7.59 4 12 4C16.41 4 20 7.59 20 12C20 16.41 16.41 20 12 20Z" fill="#9C27B0"/>
+                          <path d="M12.5 7H11V13L16.2 16.2L17 14.9L12.5 12.2V7Z" fill="#9C27B0"/>
+                      </svg>
+                  </div>
+                  <div class="service-content">
+                      <h4 class="service-title">پشتیبانی 24/7</h4>
+                      <p class="service-desc">تماس در هر ساعت</p>
+                  </div>
+              </div>
+          </div>
+          
+          <!-- اطلاعات فروشنده -->
+          <div class="seller-info">
+              <div class="seller-header">
+                  <h3 class="seller-title">فروشنده این محصول</h3>
+                  <span class="seller-rating">
+                      <span class="rating-value">4.8</span>
+                      <span class="rating-stars">★★★★★</span>
+                      <span class="rating-count">(1,234 نظر)</span>
+                  </span>
+              </div>
+              <div class="seller-content">
+                  <div class="seller-logo">
+                      <img src="https://via.placeholder.com/60" alt="دیجی‌کالا">
+                  </div>
+                  <div class="seller-details">
+                      <h4 class="seller-name">دیجی‌کالا</h4>
+                      <div class="seller-meta">
+                          <span class="meta-item">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="#2196F3"/>
+                              </svg>
+                              تهران، خیابان ولیعصر
+                          </span>
+                          <span class="meta-item">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                  <path d="M20.01 15.38C18.78 15.38 17.59 15.18 16.48 14.82C16.13 14.7 15.74 14.79 15.47 15.06L13.9 17.03C11.07 15.68 8.42 13.13 7.01 10.2L8.96 8.54C9.23 8.26 9.31 7.87 9.2 7.52C8.83 6.41 8.64 5.22 8.64 3.99C8.64 3.45 8.19 3 7.65 3H4.19C3.65 3 3 3.24 3 3.99C3 13.28 10.73 21 20.01 21C20.72 21 21 20.37 21 19.82V16.37C21 15.83 20.55 15.38 20.01 15.38Z" fill="#2196F3"/>
+                              </svg>
+                              021-12345678
+                          </span>
+                      </div>
+                  </div>
+                  <div class="seller-actions">
+                      <button class="seller-btn">مشاهده صفحه</button>
+                      <button class="seller-btn outline">تماس با فروشنده</button>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<style>
+/* استایل‌های اصلی */
+:root {
+  --primary-color: #3f51b5;
+  --primary-dark: #303f9f;
+  --primary-light: #c5cae9;
+  --secondary-color: #ff9800;
+  --success-color: #4caf50;
+  --danger-color: #f44336;
+  --warning-color: #ffc107;
+  --info-color: #2196f3;
+  --dark-color: #212121;
+  --light-color: #f5f5f5;
+  --gray-color: #9e9e9e;
+  --border-color: #e0e0e0;
+  --white: #ffffff;
+  --black: #000000;
+  --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: var(--dark-color);
+  background-color: #f9f9f9;
+}
+
+.product-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* مسیر ناوبری */
+.breadcrumb-container {
+  margin-bottom: 20px;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: var(--gray-color);
+}
+
+.breadcrumb a {
+  color: var(--gray-color);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.breadcrumb a:hover {
+  color: var(--primary-color);
+}
+
+.breadcrumb .separator {
+  margin: 0 8px;
+  color: var(--gray-color);
+}
+
+.breadcrumb .current {
+  color: var(--dark-color);
+  font-weight: 500;
+}
+
+/* بخش اصلی محصول */
+.product-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  background-color: var(--white);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  padding: 20px;
+}
+
+/* گالری محصول */
+.product-gallery-wrapper {
+  position: relative;
+}
+
+.gallery-main {
+  position: relative;
+  margin-bottom: 15px;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+.main-image-container {
+  position: relative;
+  padding-top: 100%;
+  overflow: hidden;
+}
+
+.main-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: var(--transition);
+}
+
+.image-zoom-pane {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity 0.3s, transform 0.3s;
+  z-index: 10;
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.gallery-actions {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  display: flex;
+  gap: 10px;
+  z-index: 5;
+}
+
+.action-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  color: var(--dark-color);
+}
+
+.action-btn:hover {
+  background-color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.badge-container {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 5;
+}
+
+.product-badge {
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-badge.bestseller {
+  background-color: var(--success-color);
+}
+
+.product-badge.discount {
+  background-color: var(--danger-color);
+}
+
+.product-badge.new {
+  background-color: var(--info-color);
+}
+
+/* گالری تصاویر کوچک */
+.gallery-thumbnails {
+  position: relative;
+}
+
+.thumbnail-container {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 5px;
+  margin: 0 30px;
+  scrollbar-width: none;
+}
+
+.thumbnail-container::-webkit-scrollbar {
+  display: none;
+}
+
+.thumbnail {
+  flex: 0 0 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: var(--transition);
+  background-color: #f5f5f5;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.thumbnail.active {
+  border-color: var(--primary-color);
+}
+
+.thumbnail:hover:not(.active) {
+  border-color: var(--primary-light);
+}
+
+.thumbnail-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  color: var(--dark-color);
+}
+
+.thumbnail-nav:hover {
+  background-color: var(--white);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.thumbnail-nav.prev {
+  left: 0;
+}
+
+.thumbnail-nav.next {
+  right: 0;
+}
+
+/* گزینه‌های نمایش محصول */
+.product-view-options {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.view-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 14px;
+  color: var(--dark-color);
+}
+
+.view-option.active {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.view-option:hover:not(.active) {
+  background-color: #e0e0e0;
+}
+
+/* اطلاعات محصول */
+.product-info-wrapper {
+  padding: 10px;
+}
+
+.product-header {
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.product-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--dark-color);
+  line-height: 1.4;
+}
+
+.product-subtitle {
+  font-size: 15px;
+  color: var(--gray-color);
+  margin-bottom: 15px;
+}
+
+.product-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: var(--gray-color);
+}
+
+.meta-icon {
+  margin-left: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.meta-value {
+  color: var(--dark-color);
+  font-weight: 500;
+}
+
+.rating-sales-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.rating-container {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.stars {
+  display: flex;
+  position: relative;
+  unicode-bidi: bidi-override;
+  direction: ltr;
+}
+
+.star {
+  color: #e0e0e0;
+  font-size: 16px;
+}
+
+.star.filled {
+  color: #ffc107;
+}
+
+.star.half {
+  position: relative;
+}
+
+.star.half:before {
+  position: absolute;
+  content: '★';
+  color: #ffc107;
+  width: 50%;
+  overflow: hidden;
+}
+
+.rating-value {
+  font-weight: 700;
+  color: var(--dark-color);
+}
+
+.rating-count {
+  color: var(--gray-color);
+  font-size: 13px;
+}
+
+.sales-count {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  color: var(--gray-color);
+}
+
+/* وضعیت موجودی */
+.availability-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px;
+  background-color: #f5f9f5;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #e0f0e0;
+}
+
+.availability-icon {
+  flex: 0 0 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #e8f5e9;
+  border-radius: 8px;
+}
+
+.availability-content {
+  flex: 1;
+}
+
+.availability-title {
+  font-weight: 600;
+  color: var(--success-color);
+  margin-bottom: 3px;
+}
+
+.availability-desc {
+  font-size: 13px;
+  color: var(--gray-color);
+}
+
+.availability-stock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.stock-indicator {
+  width: 60px;
+  height: 6px;
+  background-color: #e0e0e0;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.stock-level {
+  height: 100%;
+  background-color: var(--success-color);
+  width: 80%;
+}
+
+.stock-text {
+  font-size: 12px;
+  color: var(--gray-color);
+}
+
+/* قیمت و تخفیف */
+.pricing-section {
+  margin-bottom: 25px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.price-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.original-price {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 15px;
+  color: var(--gray-color);
+}
+
+.price-label {
+  font-size: 13px;
+}
+
+.price-value {
+  text-decoration: line-through;
+}
+
+.discount-badge {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #ffebee;
+  color: var(--danger-color);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.discount-percent {
+  font-weight: 700;
+}
+
+.final-price-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.final-price-label {
+  font-size: 16px;
+  color: var(--dark-color);
+}
+
+.final-price {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--dark-color);
+}
+
+.currency {
+  font-size: 16px;
+  color: var(--dark-color);
+}
+
+.discount-timer {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 12px;
+  background-color: #ffebee;
+  border-radius: 6px;
+  margin-bottom: 15px;
+  font-size: 13px;
+  color: var(--danger-color);
+}
+
+.timer-value {
+  font-weight: 600;
+}
+
+.installment-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #e3f2fd;
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--info-color);
+}
+
+.installment-price {
+  font-weight: 600;
+}
+
+/* گزینه‌های محصول */
+.product-options {
+  margin-bottom: 25px;
+}
+
+.option-group {
+  margin-bottom: 20px;
+}
+
+.option-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--dark-color);
+}
+
+.option-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* گزینه‌های رنگ */
+.color-option {
+  position: relative;
+  cursor: pointer;
+}
+
+.color-option input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.color-checkmark {
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 2px solid transparent;
+  transition: var(--transition);
+  overflow: hidden;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.color-option:hover .color-checkmark {
+  border-color: var(--primary-light);
+}
+
+.color-option input:checked ~ .color-checkmark {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color);
+}
+
+.color-name {
+  display: block;
+  text-align: center;
+  font-size: 12px;
+  margin-top: 5px;
+  color: var(--gray-color);
+}
+
+/* گزینه‌های حافظه */
+.storage-option {
+  position: relative;
+  cursor: pointer;
+}
+
+.storage-option input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.storage-checkmark {
+  display: block;
+  padding: 8px 15px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  background-color: #f5f5f5;
+  transition: var(--transition);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.storage-option:hover .storage-checkmark {
+  border-color: var(--primary-light);
+  background-color: #e8f0fe;
+}
+
+.storage-option input:checked ~ .storage-checkmark {
+  border-color: var(--primary-color);
+  background-color: #e8f0fe;
+  color: var(--primary-color);
+}
+
+/* گزینه‌های گارانتی */
+.warranty-option {
+  position: relative;
+  cursor: pointer;
+  flex: 1;
+  min-width: 120px;
+}
+
+.warranty-option input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.warranty-checkmark {
+  display: block;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background-color: #f5f5f5;
+  transition: var(--transition);
+}
+
+.warranty-option:hover .warranty-checkmark {
+  border-color: var(--primary-light);
+  background-color: #e8f0fe;
+}
+
+.warranty-option input:checked ~ .warranty-checkmark {
+  border-color: var(--primary-color);
+  background-color: #e8f0fe;
+}
+
+.warranty-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 3px;
+}
+
+.warranty-duration {
+  display: block;
+  font-size: 13px;
+  color: var(--gray-color);
+}
+
+.warranty-option input:checked ~ .warranty-checkmark .warranty-title {
+  color: var(--primary-color);
+}
+
+/* دکمه‌های اقدام */
+.action-buttons {
+  margin-bottom: 25px;
+}
+
+.add-to-cart-btn, .buy-now-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 15px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-bottom: 10px;
+}
+
+.add-to-cart-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.add-to-cart-btn:hover {
+  background-color: var(--primary-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(63, 81, 181, 0.2);
+}
+
+.buy-now-btn {
+  background-color: var(--success-color);
+  color: white;
+}
+
+.buy-now-btn:hover {
+  background-color: #388e3c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+}
+
+.secondary-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.wishlist-btn, .compare-btn, .share-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 14px;
+  color: var(--dark-color);
+}
+
+.wishlist-btn:hover, .compare-btn:hover, .share-btn:hover {
+  background-color: #e0e0e0;
+}
+
+/* خدمات محصول */
+.product-services {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.service-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  border-radius: 8px;
+  background-color: #f5f5f5;
+  transition: var(--transition);
+}
+
+.service-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.service-icon {
+  flex: 0 0 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border-radius: 8px;
+}
+
+.service-content {
+  flex: 1;
+}
+
+.service-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 3px;
+  color: var(--dark-color);
+}
+
+.service-desc {
+  font-size: 13px;
+  color: var(--gray-color);
+}
+
+/* اطلاعات فروشنده */
+.seller-info {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 15px;
+  margin-top: 25px;
+}
+
+.seller-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.seller-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--dark-color);
+}
+
+.seller-rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+}
+
+.rating-value {
+  font-weight: 600;
+  color: var(--dark-color);
+}
+
+.rating-stars {
+  color: #ffc107;
+  letter-spacing: 2px;
+}
+
+.rating-count {
+  color: var(--gray-color);
+}
+
+.seller-content {
+  display: flex;
+  gap: 15px;
+}
+
+.seller-logo {
+  flex: 0 0 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  background-color: #f5f5f5;
+}
+
+</style>
+
+
+  
+
+
+
+    <div class="product-tabs">
+        <ul class="tab-headers">
+            <li class="tab-header active" data-tab="description">توضیحات محصول</li>
+            <li class="tab-header" data-tab="specs">مشخصات فنی</li>
+            <li class="tab-header" data-tab="reviews">نظرات کاربران</li>
+            <li class="tab-header" data-tab="questions">پرسش و پاسخ</li>
+            <li class="tab-header" data-tab="warranty">گارانتی و شرایط</li>
+        </ul>
+
+        <div class="tab-content active" id="description">
+            <h2 class="section-title">توضیحات گوشی شیائومی ردمی نوت ۱۲ پرو</h2>
+            <div class="product-description">
+                <p>گوشی هوشمند شیائومی ردمی نوت ۱۲ پرو با طراحی زیبا و عملکرد قدرتمند، انتخابی عالی برای کاربرانی است که
+                    به دنبال تجربه‌ای سطح بالا در استفاده روزمره از موبایل هستند. این دستگاه با صفحه نمایش AMOLED 6.67
+                    اینچی و نرخ نوسازی 120 هرتز، تصاویری زنده و روان ارائه می‌دهد.</p>
+
+                <p><strong>ویژگی‌های کلیدی:</strong></p>
+                <ul>
+                    <li>پردازنده قدرتمند MediaTek Dimensity 1080 با فرآیند 6 نانومتری</li>
+                    <li>حافظه داخلی 128 گیگابایت با رم 8 گیگابایت</li>
+                    <li>صفحه نمایش AMOLED 6.67 اینچی با رزولوشن Full HD+ و نرخ نوسازی 120 هرتز</li>
+                    <li>دوربین اصلی 50 مگاپیکسلی با سنسور IMX766 و لرزش‌گیر اپتیکال (OIS)</li>
+                    <li>دوربین سلفی 16 مگاپیکسلی</li>
+                    <li>باتری 5000 میلی‌آمپر ساعتی با پشتیبانی از شارژ سریع 67 وات</li>
+                    <li>سیستم عامل Android 12 با رابط کاربری MIUI 14</li>
+                    <li>پشتیبانی از شبکه‌های 5G</li>
+                </ul>
+
+                <p><strong>طراحی و نمایشگر:</strong><br>
+                    ردمی نوت ۱۲ پرو با طراحی نازک و سبک (تنها 7.9 میلی‌متر ضخامت و 187 گرم وزن) ارائه شده است. صفحه
+                    نمایش AMOLED این دستگاه با پشتیبانی از 1 میلیارد رنگ، کنتراست بالا و روشنایی 900 نیت، تجربه‌ای
+                    بی‌نظیر از تماشای محتوا ارائه می‌دهد. همچنین وجود نرخ نوسازی 120 هرتز باعث می‌شود حرکت‌ها در صفحه
+                    نمایش بسیار روان به نظر برسند.</p>
+
+                <p><strong>عملکرد و باتری:</strong><br>
+                    پردازنده MediaTek Dimensity 1080 با معماری 6 نانومتری و 8 هسته‌ای، عملکردی روان و قدرتمند را برای
+                    اجرای بازی‌ها و برنامه‌های سنگین فراهم می‌کند. باتری 5000 میلی‌آمپر ساعتی همراه با فناوری شارژ سریع
+                    67 وات، امکان استفاده طولانی مدت و شارژ سریع را فراهم می‌سازد.</p>
+            </div>
+        </div>
+
+        <div class="tab-content" id="specs">
+            <h2 class="section-title">مشخصات فنی گوشی شیائومی ردمی نوت ۱۲ پرو</h2>
+            <table class="specs-table">
+                <tr>
+                    <th>اطلاعات کلی</th>
+                    <td>گوشی هوشمند شیائومی ردمی نوت ۱۲ پرو دو سیم‌کارت ظرفیت 128 گیگابایت و رم 8 گیگابایت - مدل 2023
+                    </td>
+                </tr>
+                <tr>
+                    <th>برند</th>
+                    <td>شیائومی (Xiaomi)</td>
+                </tr>
+                <tr>
+                    <th>مدل</th>
+                    <td>Redmi Note 12 Pro</td>
+                </tr>
+                <tr>
+                    <th>شبکه‌های ارتباطی</th>
+                    <td>2G, 3G, 4G LTE, 5G</td>
+                </tr>
+                <tr>
+                    <th>ابعاد</th>
+                    <td>162.7 × 76 × 7.9 میلی‌متر</td>
+                </tr>
+                <tr>
+                    <th>وزن</th>
+                    <td>187 گرم</td>
+                </tr>
+                <tr>
+                    <th>صفحه نمایش</th>
+                    <td>6.67 اینچی - AMOLED - رزولوشن 2400×1080 - نرخ نوسازی 120 هرتز - روشنایی 900 نیت</td>
+                </tr>
+                <tr>
+                    <th>پردازنده</th>
+                    <td>MediaTek Dimensity 1080 - 6 نانومتری - 8 هسته‌ای (2 هسته 2.6 گیگاهرتز + 6 هسته 2.0 گیگاهرتز)
+                    </td>
+                </tr>
+                <tr>
+                    <th>حافظه داخلی</th>
+                    <td>128 گیگابایت</td>
+                </tr>
+                <tr>
+                    <th>حافظه RAM</th>
+                    <td>8 گیگابایت</td>
+                </tr>
+                <tr>
+                    <th>دوربین اصلی</th>
+                    <td>50 مگاپیکسل (لنز اصلی با OIS) + 8 مگاپیکسل (اولترا واید) + 2 مگاپیکسل (ماکرو)</td>
+                </tr>
+                <tr>
+                    <th>دوربین سلفی</th>
+                    <td>16 مگاپیکسل</td>
+                </tr>
+                <tr>
+                    <th>باتری</th>
+                    <td>5000 میلی‌آمپر ساعتی - شارژ سریع 67 وات</td>
+                </tr>
+                <tr>
+                    <th>سیستم عامل</th>
+                    <td>Android 12 با رابط کاربری MIUI 14</td>
+                </tr>
+                <tr>
+                    <th>سایر ویژگی‌ها</th>
+                    <td>اسکنر اثر انگشت زیر نمایشگر - بلندگوی استریو - مقاومت در برابر پاشش آب و گرد و غبار (IP53)</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="tab-content" id="reviews">
+            <h2 class="section-title">نظرات کاربران درباره گوشی شیائومی ردمی نوت ۱۲ پرو</h2>
+            <div class="reviews-section">
+                <div class="review-summary">
+                    <div class="average-rating">
+                        <span class="rating-value">4.6</span>
+                        <div class="rating-stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="rating-count">بر اساس 47 نظر</span>
+                    </div>
+                    <div class="rating-bars">
+                        <div class="rating-bar">
+                            <span class="star-count">5 ستاره</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 70%;"></div>
+                            </div>
+                            <span class="percentage">70%</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span class="star-count">4 ستاره</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 20%;"></div>
+                            </div>
+                            <span class="percentage">20%</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span class="star-count">3 ستاره</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 5%;"></div>
+                            </div>
+                            <span class="percentage">5%</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span class="star-count">2 ستاره</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 3%;"></div>
+                            </div>
+                            <span class="percentage">3%</span>
+                        </div>
+                        <div class="rating-bar">
+                            <span class="star-count">1 ستاره</span>
+                            <div class="bar-container">
+                                <div class="bar" style="width: 2%;"></div>
+                            </div>
+                            <span class="percentage">2%</span>
+                        </div>
+                    </div>
+                    <button class="add-review-btn">ثبت نظر جدید</button>
+                </div>
+                <div class="review-list">
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="reviewer">
+                                <div class="reviewer-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span class="reviewer-name">علیرضا محمدی</span>
+                            </div>
+                            <div class="review-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="review-date">۱۴۰۲/۰۵/۱۲</div>
+                        <h3 class="review-title">کیفیت ساخت عالی و عملکرد فوق‌العاده</h3>
+                        <p class="review-text">این گوشی واقعا عالی هست. صفحه نمایشش خیلی باکیفیت و رنگ‌ها واقعی هستند.
+                            دوربین اصلی هم عالی کار می‌کنه و عکس‌های خیلی باکیفیتی می‌گیره. باتری هم که عالیه، با یک بار
+                            شارژ تا دو روز کار می‌کنه.</p>
+                        <div class="review-images">
+                            <div class="review-image">
+                                <img src="https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGhvbmV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60"
+                                    alt="عکس نظر">
+                            </div>
+                            <div class="review-image">
+                                <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGhvbmV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60"
+                                    alt="عکس نظر">
+                            </div>
+                        </div>
+                        <div class="review-helpful">
+                            <span>آیا این نظر برایتان مفید بود؟</span>
+                            <button class="helpful-btn">
+                                <i class="fas fa-thumbs-up"></i>
+                                بله (12)
+                            </button>
+                            <button class="helpful-btn">
+                                <i class="fas fa-thumbs-down"></i>
+                                خیر (2)
+                            </button>
+                        </div>
+                    </div>
+                    <div class="review-item">
+                        <div class="review-header">
+                            <div class="reviewer">
+                                <div class="reviewer-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span class="reviewer-name">فاطمه احمدی</span>
+                            </div>
+                            <div class="review-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                            </div>
+                        </div>
+                        <div class="review-date">۱۴۰۲/۰۵/۰۸</div>
+                        <h3 class="review-title">خوب ولی جای پیشرفت دارد</h3>
+                        <p class="review-text">گوشی خوبیه ولی چند نکته منفی داره. اول اینکه وزنش کمی زیاده و بعد از مدتی
+                            استفاده دستتون خسته میشه. دوم اینکه رابط کاربری MIUI کمی سنگینه و گاهی هنگ می‌کنه. ولی در کل
+                            برای این قیمت خوبه.</p>
+                        <div class="review-helpful">
+                            <span>آیا این نظر برایتان مفید بود؟</span>
+                            <button class="helpful-btn">
+                                <i class="fas fa-thumbs-up"></i>
+                                بله (8)
+                            </button>
+                            <button class="helpful-btn">
+                                <i class="fas fa-thumbs-down"></i>
+                                خیر (3)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="questions">
+            <h2 class="section-title">پرسش و پاسخ درباره گوشی شیائومی ردمی نوت ۱۲ پرو</h2>
+            <div class="questions-section">
+                <div class="ask-question">
+                    <h3>پرسش خود را مطرح کنید</h3>
+                    <form class="question-form">
+                        <textarea placeholder="پرسش خود را درباره این محصول بنویسید..."></textarea>
+                        <button type="submit">ثبت پرسش</button>
+                    </form>
+                </div>
+                <div class="question-list">
+                    <div class="question-item">
+                        <div class="question-header">
+                            <span class="questioner">محمد رضایی</span>
+                            <span class="question-date">۱۴۰۲/۰۵/۱۵</span>
+                        </div>
+                        <p class="question-text">آیا این گوشی از شارژ بی‌سیم پشتیبانی می‌کند؟</p>
+                        <div class="answer">
+                            <div class="answer-header">
+                                <span class="answerer">پشتیبانی فروشگاه</span>
+                                <span class="answer-date">۱۴۰۲/۰۵/۱۶</span>
+                            </div>
+                            <p class="answer-text">خیر، این مدل از فناوری شارژ بی‌سیم پشتیبانی نمی‌کند. فقط شارژ سریع 67
+                                وات از طریق کابل را دارد.</p>
+                        </div>
+                    </div>
+                    <div class="question-item">
+                        <div class="question-header">
+                            <span class="questioner">نرگس کریمی</span>
+                            <span class="question-date">۱۴۰۲/۰۵/۱۰</span>
+                        </div>
+                        <p class="question-text">آیا این گوشی مقاوم در برابر آب است؟</p>
+                        <div class="answer">
+                            <div class="answer-header">
+                                <span class="answerer">پشتیبانی فروشگاه</span>
+                                <span class="answer-date">۱۴۰۲/۰۵/۱۱</span>
+                            </div>
+                            <p class="answer-text">این گوشی دارای گواهی IP53 است که به معنای مقاومت در برابر پاشش آب و
+                                گرد و غبار است. اما برای غوطه‌وری در آب طراحی نشده است.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="warranty">
+            <h2 class="section-title">گارانتی و شرایط بازگشت</h2>
+            <div class="product-description">
+                <p><strong>گارانتی محصول:</strong><br>
+                    این محصول دارای 18 ماه گارانتی شرکتی شیائومی ایران می‌باشد. گارانتی شامل ایرادات فنی و ساختاری
+                    دستگاه بوده و مواردی مانند شکستگی صفحه نمایش، آسیب‌های ناشی از ضربه، آب خوردگی و ... تحت پوشش
+                    گارانتی قرار نمی‌گیرند.</p>
+
+                <p><strong>شرایط بازگشت کالا:</strong><br>
+                    در صورت عدم رضایت از کالا، می‌توانید تا 7 روز پس از دریافت محصول، آن را مرجوع نمایید. شرایط بازگشت
+                    کالا:</p>
+                <ul>
+                    <li>کالا باید در حالت کاملا سالم و بدون کوچکترین خراش یا آسیب باشد</li>
+                    <li>تمام قطعات و لوازم جانبی باید به همراه کالا بازگردانده شود</li>
+                    <li>جعبه محصول باید سالم و بدون آسیب باشد</li>
+                    <li>کالاهای فعال‌شده و دارای نصب نرم‌افزار فقط در صورت وجود مشکل فنی قابل بازگشت هستند</li>
+                </ul>
+
+                <p><strong>نحوه استفاده از گارانتی:</strong><br>
+                    در صورت بروز مشکل، می‌توانید به یکی از روش‌های زیر اقدام نمایید:</p>
+                <ol>
+                    <li>مراجعه به سایت شیائومی ایران و ثبت درخواست گارانتی</li>
+                    <li>تماس با پشتیبانی شیائومی به شماره ۰۲۱۸۹۶۹</li>
+                    <li>مراجعه به مراکز خدمات پس از فروش معتبر شیائومی</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <!-- محصولات مرتبط -->
+    <div class="related-products">
+        <div class="section-header">
+            <h2 class="section-title">محصولات مشابه</h2>
+            <a href="#" class="view-all">
+                مشاهده همه
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </div>
+        <div class="products-grid">
+            <div class="product-card">
+                <span class="product-badge">15% تخفیف</span>
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGhvbmV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60"
+                        alt="گوشی شیائومی ردمی نوت ۱۱">
+                    <div class="product-actions">
+                        <button class="action-btn">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <button class="action-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                        <button class="action-btn">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <div class="product-brand">شیائومی</div>
+                    <h3 class="product-name">گوشی هوشمند شیائومی ردمی نوت ۱۱ دو سیم‌کارت ظرفیت 128 گیگابایت و رم 6
+                        گیگابایت</h3>
+                    <div class="product-price">
+                        <span class="product-final-price">۱۰,۲۹۹,۰۰۰ تومان</span>
+                        <span class="product-original-price">۱۲,۵۹۹,۰۰۰ تومان</span>
+                    </div>
+                    <div class="product-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <span class="product-rating-count">(24)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="product-card">
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8cGhvbmV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60"
+                        alt="گوشی سامسونگ A23">
+                    <div class="product-actions">
+                        <button class="action-btn">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <button class="action-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                        <button class="action-btn">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <div class="product-brand">سامسونگ</div>
+                    <h3 class="product-name">گوشی هوشمند سامسونگ Galaxy A23 دو سیم‌کارت ظرفیت 128 گیگابایت و رم 4
+                        گیگابایت</h3>
+                    <div class="product-price">
+                        <span class="product-final-price">۹,۸۹۹,۰۰۰ تومان</span>
+                    </div>
+                    <div class="product-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <span class="product-rating-count">(18)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="product-card">
+                <span class="product-badge">جدید</span>
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1580913428735-bd3c269d6a82?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cGhvbmV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500&q=60"
+                        alt="گوشی هوآوی Nova 10">
+                    <div class="product-actions">
+                        <button class="action-btn">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <button class="action-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                        <button class="action-btn">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <div class="product-brand">هوآوی</div>
+                    <h3 class="product-name">گوشی هوشمند هوآوی Nova 10 دو سیم‌کارت ظرفیت 256 گیگابایت و رم 8 گیگابایت
+                    </h3>
+                    <div class="product-price">
+                        <span class="product-final-price">۱۵,۷۹۹,۰۰۰ تومان</span>
+                    </div>
+                    <div class="product-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                        <span class="product-rating-count">(32)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="product-card">
+                <span class="product-badge">10% تخفیف</span>
+                <div class="product-image">
+                    <img src="https://images.unsplash.com/photo-1565849904461-04a58ad377e0?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHBob25lfGVufDB8fDB8fHww&auto=format&fit=crop&w=500&q=60"
+                        alt="گوشی پوکو X4 Pro">
+                    <div class="product-actions">
+                        <button class="action-btn">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <button class="action-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                        </button>
+                        <button class="action-btn">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <div class="product-brand">پوکو</div>
+                    <h3 class="product-name">گوشی هوشمند پوکو X4 Pro دو سیم‌کارت ظرفیت 128 گیگابایت و رم 6 گیگابایت</h3>
+                    <div class="product-price">
+                        <span class="product-final-price">۱۱,۹۹۹,۰۰۰ تومان</span>
+                        <span class="product-original-price">۱۳,۵۹۹,۰۰۰ تومان</span>
+                    </div>
+                    <div class="product-rating">
+                        <div class="stars">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="far fa-star"></i>
+                        </div>
+                        <span class="product-rating-count">(15)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<!-- زوم تصویر -->
+<div class="zoom-overlay">
+    <button class="close-zoom">
+        <i class="fas fa-times"></i>
+    </button>
+    <img src="" alt="تصویر بزرگ‌شده" class="zoomed-image">
+</div>
+
+
+{% endblock%}

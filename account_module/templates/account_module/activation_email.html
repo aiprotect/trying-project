@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>فعال‌سازی حساب کاربری</title>
+    <style>
+        body { font-family: Tahoma; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .button {
+            display: inline-block;
+            background: #4a89dc;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>سلام {{ user.get_full_name|default:user.username }},</h2>
+        <p>برای فعال‌سازی حساب کاربری خود روی دکمه زیر کلیک کنید:</p>
+        
+        <a href="{{ activation_link }}" class="button">
+            فعال‌سازی حساب کاربری
+        </a>
+        
+        <p>اگر شما این درخواست را انجام نداده‌اید، این ایمیل را نادیده بگیرید.</p>
+        
+        <p style="color: #888; font-size: 12px; margin-top: 20px;">
+            این لینک تا 24 ساعت اعتبار دارد.
+        </p>
+    </div>
+</body>
+</html>

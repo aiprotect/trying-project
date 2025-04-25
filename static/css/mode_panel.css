@@ -1,0 +1,115 @@
+.theme-toggle-container {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    z-index: 1000;
+}
+
+.theme-toggle-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.theme-toggle-btn:hover {
+    transform: scale(1.1);
+}
+
+.theme-toggle-btn i {
+    position: absolute;
+    transition: all 0.3s ease;
+}
+
+.theme-toggle-btn .fa-sun {
+    opacity: 0;
+    transform: rotate(90deg);
+}
+
+.theme-toggle-btn .fa-moon {
+    opacity: 1;
+    transform: rotate(0);
+}
+
+.dark-mode .theme-toggle-btn .fa-moon {
+    opacity: 0;
+    transform: rotate(-90deg);
+}
+
+.dark-mode .theme-toggle-btn .fa-sun {
+    opacity: 1;
+    transform: rotate(0);
+}
+
+/* استایل‌های حالت تاریک - نسخه بهبود یافته */
+.dark-mode {
+    --bg-color: #1a1a1a;
+    --text-color: #f0f0f0;
+    --sidebar-bg: #222;
+    --card-bg: #2d2d2d;
+    --border-color: #444;
+}
+
+.dark-mode body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+.dark-mode .dashboard-sidebar {
+    background-color: var(--sidebar-bg);
+    border-right-color: var(--border-color);
+}
+
+.dark-mode .dashboard-content,
+.dark-mode .stat-card,
+.dark-mode .recent-orders,
+.dark-mode .orders-table,
+.dark-mode .product-card,
+.dark-mode .notification-card {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.dark-mode .menu-item,
+.dark-mode .section-title,
+.dark-mode .product-title,
+.dark-mode .notification-title,
+.dark-mode .user-name,
+.dark-mode .stat-title,
+.dark-mode .stat-value {
+    color: var(--text-color) !important;
+}
+
+.dark-mode .user-email,
+.dark-mode .menu-category,
+.dark-mode .page-title p,
+.dark-mode .stat-change,
+.dark-mode .notification-time {
+    color: var(--text-secondary) !important;
+}
+
+.dark-mode .search-input {
+    background-color: #333;
+    color: white;
+    border-color: #444;
+}
+
+/* انیمیشن‌های انتقال */
+body,
+.dashboard-sidebar,
+.dashboard-content,
+.stat-card,
+.recent-orders,
+.notification-card,
+.product-card,
+.menu-item {
+    transition: background-color 0.3s ease, color 0.3s ease;
+}

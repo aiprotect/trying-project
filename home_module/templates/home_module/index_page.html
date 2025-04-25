@@ -1,0 +1,310 @@
+<!-- هدر سایت -->
+{%extends 'base.html'%}
+
+{% block title %}فروشگاه اینترنتی دیجی کالا {% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/fonts.css">
+
+<link rel="stylesheet" href="/static/css/new_front.css">
+<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
+<link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="/static/css/all.min.css">
+<style>/* Masthead/Header Styles */
+    .masthead {
+      padding: 17rem 0;
+      text-align: center;
+      color: #fff;
+      background-image: url("/static/images/header-bg.jpg");
+      background-repeat: no-repeat;
+      background-attachment: scroll;
+      background-position: center center;
+      background-size: cover;
+    }
+    
+    .masthead .masthead-subheading {
+      font-size: 1.5rem;
+      font-style: italic;
+      line-height: 1.5rem;
+      margin-bottom: 25px;
+      font-family: "Roboto Slab", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    }
+    
+    .masthead .masthead-heading {
+      font-size: 3.25rem;
+      font-weight: 700;
+      line-height: 3.25rem;
+      margin-bottom: 2rem;
+      font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    }
+    
+    @media (min-width: 768px) {
+      .masthead {
+        padding: 17rem 0;
+      }
+      .masthead .masthead-subheading {
+        font-size: 2.25rem;
+        font-style: italic;
+        line-height: 2.25rem;
+        margin-bottom: 2rem;
+      }
+      .masthead .masthead-heading {
+        font-size: 4.5rem;
+        font-weight: 700;
+        line-height: 4.5rem;
+        margin-bottom: 4rem;
+      }
+    }
+    
+    /* Button Styles */
+    .btn {
+      font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+      font-weight: 700;
+    }
+    
+    .btn-xl {
+      padding: 1.25rem 2.5rem;
+    }
+    
+    .btn-primary {
+      color: #fff;
+      background-color: #ffc800;
+      border-color: #ffc800;
+    }
+    
+    .btn-primary:hover {
+      color: #fff;
+      background-color: #d9aa00;
+      border-color: #cca000;
+    }
+    
+    .btn-primary:focus, .btn-primary.focus {
+      color: #fff;
+      background-color: #d9aa00;
+      border-color: #cca000;
+      box-shadow: 0 0 0 0.2rem rgba(222, 170, 12, 0.5);
+    }</style>
+{% endblock %}
+
+
+
+{% block extra_js %}
+<script src="/static/js/new_front.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@9/swiper-bundle.min.js"></script>
+<script src="/static/css/bostrap.js"></script>
+
+{% endblock %}
+{%block content%}
+<header class="masthead">
+    <div class="container">
+        <div class="masthead-subheading">Welcome To Our Studio!</div>
+        <div class="masthead-heading text-uppercase">It's Nice To Meet You</div>
+        <a class="btn btn-primary btn-xl text-uppercase" href="#services">Tell Me More</a>
+    </div>
+</header>
+{% if messages %}
+<div class="messages-container">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        <div class="alert-icon">
+            {% if message.tags == 'error' %}
+            <i class="fas fa-exclamation-circle"></i>
+            {% elif message.tags == 'success' %}
+            <i class="fas fa-check-circle"></i>
+            {% else %}
+            <i class="fas fa-info-circle"></i>
+            {% endif %}
+        </div>
+        <div class="alert-content">
+            {{ message }}
+        </div>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+
+
+
+
+<!-- دسته‌بندی محصولات -->
+<section class="categories-section">
+    <div class="container">
+        <h2 class="section-title">دسته‌بندی محصولات</h2>
+        <div class="categories-grid">
+            <a href="{% url 'product-list'%}" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-mobile"></i>
+                </div>
+                <h3> موبایل </h3>
+            </a>
+
+            <a href="#" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-laptop"></i>
+                </div>
+                <h3>لپ تاپ و کامپیوتر</h3>
+            </a>
+            <a href="#" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-tshirt"></i>
+                </div>
+                <h3>پوشاک</h3>
+            </a>
+            <a href="#" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <h3>خانه و آشپزخانه</h3>
+            </a>
+            <a href="#" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <h3>اسباب بازی</h3>
+            </a>
+            <a href="#" class="category-card">
+                <div class="category-icon">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h3>کتاب و لوازم تحریر</h3>
+            </a>
+        </div>
+    </div>
+</section>
+<!-- محصولات پرفروش -->
+<section class="products-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">محصولات پرفروش</h2>
+            <a href="#" class="view-all">مشاهده همه <i class="fas fa-chevron-left"></i></a>
+        </div>
+
+        <div class="swiper productsSwiper">
+            <div class="swiper-wrapper">
+                <!-- محصول 1 -->
+                <div class="swiper-slide">
+                    <div class="product-card">
+                        <div class="product-badge">پرفروش</div>
+                        <div class="product-image">
+                            <img src="/static/images/download.jpg" alt="محصول 1">
+                            <div class="product-actions">
+                                <button class="add-to-cart"><i class="fas fa-shopping-cart"></i></button>
+                                <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                                <button class="quick-view"><i class="far fa-eye"></i></button>
+                            </div>
+                        </div>
+                        <div class="product-details">
+                            <h3 class="product-title">گوشی موبایل سامسونگ مدل Galaxy S23</h3>
+                            <div class="product-price">
+                                <span class="current-price">۲۵,۹۹۰,۰۰۰ تومان</span>
+                                <span class="old-price">۲۸,۵۰۰,۰۰۰ تومان</span>
+                            </div>
+                            <div class="product-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star-half-alt"></i>
+                                <span>(42)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- محصول 2 -->
+                <div class="swiper-slide">
+                    <div class="product-card">
+                        <div class="product-badge">جدید</div>
+                        <div class="product-image">
+                            <img src="/static/images/download.jpg" alt="محصول 2">
+                            <div class="product-actions">
+                                <button class="add-to-cart"><i class="fas fa-shopping-cart"></i></button>
+                                <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                                <button class="quick-view"><i class="far fa-eye"></i></button>
+                            </div>
+                        </div>
+                        <div class="product-details">
+                            <h3 class="product-title">هدفون بی‌سیم Sony WH-1000XM4</h3>
+                            <div class="product-price">
+                                <span class="current-price">۶,۵۰۰,۰۰۰ تومان</span>
+                            </div>
+                            <div class="product-rating">
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="fas fa-star"></i>
+                                <i class="far fa-star"></i>
+                                <span>(18)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- محصولات دیگر... -->
+            </div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+        </div>
+    </div>
+</section>
+
+<!-- تبلیغات میانی -->
+<section class="promo-banner">
+    <div class="container">
+        <div class="banner-content">
+            <h2>تخفیف ویژه نوروزی</h2>
+            <p>تا 40% تخفیف برای خریدهای بالای 5 میلیون تومان</p>
+            <a href="#" class="btn">همین حالا خرید کنید</a>
+        </div>
+    </div>
+</section>
+
+<!-- محصولات جدید -->
+<section class="products-section">
+    <div class="container">
+        <div class="section-header">
+            <h2 class="section-title">محصولات جدید</h2>
+            <a href="#" class="view-all">مشاهده همه <i class="fas fa-chevron-left"></i></a>
+        </div>
+
+        <div class="products-grid">
+            <!-- محصول 1 -->
+            <div class="product-card">
+                <div class="product-badge new">جدید</div>
+                <div class="product-image">
+                    <img src="" alt="محصول 1">
+                    <div class="product-actions">
+                        <button class="add-to-cart"><i class="fas fa-shopping-cart"></i></button>
+                        <button class="add-to-wishlist"><i class="far fa-heart"></i></button>
+                        <button class="quick-view"><i class="far fa-eye"></i></button>
+                    </div>
+                </div>
+                <div class="product-details">
+                    <h3 class="product-title">لپ تاپ ایسوس مدل Vivobook 15</h3>
+                    <div class="product-price">
+                        <span class="current-price">۳۲,۹۹۰,۰۰۰ تومان</span>
+                    </div>
+                    <div class="product-rating">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="far fa-star"></i>
+                        <span>(7)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- محصولات دیگر... -->
+        </div>
+    </div>
+</section>
+
+<!-- فوتر -->
+
+{%endblock%}

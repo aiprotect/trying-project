@@ -1,0 +1,167 @@
+{% extends 'login_component.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* استایل‌های پیام‌ها */
+    .auth-message {
+        border-radius: 8px;
+        padding: 12px 15px;
+        margin-bottom: 20px;
+        border-right: 4px solid;
+        animation: fadeIn 0.3s ease-out;
+        display: flex;
+        align-items: center;
+    }
+    
+    /* استایل پیام‌های خطا */
+    .auth-error-message {
+        background: rgba(220, 53, 69, 0.1);
+        border-color: #dc3545;
+    }
+    
+    /* استایل پیام‌های موفقیت */
+    .auth-success-message {
+        background: rgba(25, 135, 84, 0.1);
+        border-color: #198754;
+    }
+    
+    /* استایل پیام‌های اطلاعاتی */
+    .auth-info-message {
+        background: rgba(13, 110, 253, 0.1);
+        border-color: #0d6efd;
+    }
+    
+    .auth-message p {
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+    
+    .auth-message i {
+        margin-left: 8px;
+    }
+    
+    .auth-error-message p {
+        color: #dc3545;
+    }
+    
+    .auth-success-message p {
+        color: #198754;
+    }
+    
+    .auth-info-message p {
+        color: #0d6efd;
+    }
+    
+    .resend-activation {
+        margin-top: 15px;
+        text-align: center;
+    }
+    
+    .resend-activation a {
+        color: #0d6efd;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+    }
+    
+    .resend-activation a:hover {
+        color: #0b5ed7;
+        text-decoration: underline;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="auth-container">
+    <div class="auth-bg-elements">
+        <div class="auth-bubble" style="--i:1"></div>
+        <div class="auth-bubble" style="--i:2"></div>
+        <div class="auth-bubble" style="--i:3"></div>
+        <div class="auth-bubble" style="--i:4"></div>
+        <div class="auth-bubble" style="--i:5"></div>
+    </div>
+
+    <div class="auth-card">
+        <div class="auth-header">
+            <img src="{% static 'images/logo.svg' %}" alt="Logo" class="auth-logo">
+            <h2 class="auth-title">ورود به حساب کاربری</h2>
+            <p class="auth-subtitle">لطفاً اطلاعات خود را وارد کنید</p>
+        </div>
+
+        <form action="{% url 'login-page' %}" class="auth-form" method="post" novalidate>
+            {% if form.non_field_errors %}
+            <div class="auth-message auth-error-message">
+                {% for error in form.non_field_errors %}
+                <p>
+                    <i class="fas fa-exclamation-circle"></i>
+                    {{ error }}
+                </p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+  
+
+            <div class="auth-field {% if form.username.errors %}has-error{% endif %}">
+                <label for="{{ form.username.id_for_label }}" class="auth-label">
+                    <i class="fas fa-user auth-icon"></i>
+                    نام کاربری یا ایمیل
+                </label>
+                <div class="auth-input-wrapper">
+                    {{ form.username }}
+                </div>
+                {% for error in form.username.errors %}
+                <span class="auth-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="auth-field {% if form.password.errors %}has-error{% endif %}">
+                <label for="{{ form.password.id_for_label }}" class="auth-label">
+                    <i class="fas fa-lock auth-icon"></i>
+                    رمز عبور
+                </label>
+                <div class="auth-input-wrapper">
+                    {{ form.password }}
+                </div>
+                {% for error in form.password.errors %}
+                <span class="auth-error">{{ error }}</span>
+                {% endfor %}
+            </div>
+
+            <div class="auth-options">
+                <div class="auth-remember">
+                    <input type="checkbox" id="remember" name="remember">
+                    <label for="remember">مرا به خاطر بسپار</label>
+                </div>
+                <div class="auth-forgot">
+                    <a href="{% if request.user.is_superuser %}{% url 'change-password' %}{% else %}{% url 'forget-pass-page' %}{% endif %} ">رمز عبور را فراموش کرده‌اید؟</a>
+                </div>
+            </div>
+
+            <button type="submit" class="auth-btn">
+                <span>ورود به حساب</span>
+                <i class="fas fa-arrow-left auth-btn-icon"></i>
+            </button>
+
+            {% if not user.is_active and form.non_field_errors %}
+            <div class="resend-activation">
+                <a href="{% url 'resend-activation' %}">
+                    <i class="fas fa-paper-plane"></i>
+                    ارسال مجدد لینک فعال‌سازی
+                </a>
+            </div>
+            {% endif %}
+
+            <div class="auth-register-link">
+                حساب کاربری ندارید؟ <a href="{% url 'register-page' %}">ثبت‌نام کنید</a>
+            </div>
+            {% csrf_token %}
+        </form>
+    </div>
+</div>
+{% endblock %}

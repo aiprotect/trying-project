@@ -1,0 +1,31 @@
+{% extends 'mode_online.html' %}
+
+{% block content %}
+<h1>لیست کاربران</h1>
+<ul id="online-users">
+    {% for profile in profiles %}
+    <li>
+        {{ profile.user.username }}
+        <span class="{% if profile.is_online %}online-dot{% else %}offline-dot{% endif %}"></span>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}
+
+<style>
+.online-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: green;
+    border-radius: 50%;
+}
+
+.offline-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+}
+</style>

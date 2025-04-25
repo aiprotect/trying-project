@@ -1,0 +1,17 @@
+<div class="product-image-wrapper">
+    <div class="single-products">
+        <div class="productinfo text-center">
+            <a href="{{ product.get_absolute_url }}">
+                {% thumbnail product.image "268x250" quality=90 crop='center' as im %}
+                <img src="{{ im.url }}" alt="{{ product.title }}">
+                {% endthumbnail %}
+            </a>
+            <h2>{{ product.price|three_digits_currency }}</h2>
+            <p>{{ product.title }}</p>
+            <a href="#" class="btn btn-default add-to-cart">
+                <i class="fa fa-shopping-cart"></i>
+                افزودن به سبد خرید
+            </a>
+        </div>
+    </div>
+</div>

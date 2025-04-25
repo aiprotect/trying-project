@@ -1,0 +1,29 @@
+{% load static%}
+{% load render_partial %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/images/favicon.ico">
+    {% block extra_css %}
+    {%endblock%}
+    {% include 'shared/header_references.html' %}
+
+    <title>{%block title%}{%endblock%}</title>
+</head>
+
+<body>
+
+    {% render_partial 'home_module.views.site_header_component' %}
+    {% block content %}{% endblock %}
+    {% render_partial 'home_module.views.site_footer_component' %}
+
+
+</body>
+{% block extra_js %}
+{%endblock %}
+{% include 'shared/footer_references.html' %}
+
+</html>

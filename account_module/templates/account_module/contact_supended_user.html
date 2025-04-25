@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/all.min.css' %}">
+<link rel="stylesheet" href="/static/css/contact_supended.css">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/particles.min.js' %}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize particles.js
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#ffffff" },
+                shape: { type: "circle" },
+                opacity: { value: 0.3, random: true },
+                size: { value: 3, random: true },
+                line_linked: { enable: true, distance: 150, color: "#ffffff", opacity: 0.2, width: 1 },
+                move: { enable: true, speed: 1, direction: "none", random: true }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "grab" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                }
+            }
+        });
+
+        // Show notifications from Django messages
+        {% if messages %}
+            {% for message in messages %}
+                showNotification('{{ message.tags }}', '{{ message|escapejs }}');
+            {% endfor %}
+        {% endif %}
+
+        // Add error classes to form fields
+        document.querySelectorAll('.error-message').forEach(errorElement => {
+            const inputId = errorElement.previousElementSibling.id;
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.classList.add('is-invalid');
+                
+                // Remove error on input
+                input.addEventListener('input', function() {
+                    if (this.value.trim() !== '') {
+                        this.classList.remove('is-invalid');
+                        const errorDiv = this.nextElementSibling;
+                        if (errorDiv && errorDiv.classList.contains('error-message')) {
+                            errorDiv.style.display = 'none';
+                        }
+                    }
+                });
+            }
+        });
+
+        // Form submission handling
+        const form = document.querySelector('.contact-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // You can add additional client-side validation here
+            });
+        }
+    });
+
+    // Notification function
+    function showNotification(type, message) {
+        const container = document.createElement('div');
+        container.className = 'notification-container';
+        document.body.appendChild(container);
+        
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        
+        let icon;
+        switch(type) {
+            case 'success':
+                icon = '<i class="fas fa-check-circle"></i>';
+                break;
+            case 'error':
+                icon = '<i class="fas fa-exclamation-circle"></i>';
+                break;
+            default:
+                icon = '<i class="fas fa-info-circle"></i>';
+        }
+        
+        notification.innerHTML = `${icon} ${message}`;
+        container.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.classList.add('show');
+        }, 100);
+        
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => {
+                notification.remove();
+                if (container.children.length === 0) {
+                    container.remove();
+                }
+            }, 500);
+        }, 5000);
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="contact-container">
+    <div id="particles-js"></div>
+
+    <main class="main-content">
+        <div class="contact-content">
+            <h1 class="contact-title">تماس با پشتیبانی</h1>
+            <div class="contact-message">
+                <p>حساب کاربری شما موقتاً محدود شده است. لطفاً برای رفع محدودیت با اطلاعات زیر با ما در ارتباط باشید.</p>
+                <p>ما در اسرع وقت به درخواست شما رسیدگی خواهیم کرد.</p>
+            </div>
+
+            <form class="contact-form" action="{% url 'contact-supended-page' %}" method="POST" novalidate>
+                {% csrf_token %}
+
+                <!-- نمایش خطاهای غیرفیلدی -->
+                {% if form.non_field_errors %}
+                <div class="notification notification-error show" style="position: relative; margin-bottom: 2rem;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    {% for error in form.non_field_errors %}
+                    <span>{{ error }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="form-group">
+                    <label for="{{ form.full_name.id_for_label }}">نام کامل</label>
+                    {{ form.full_name }}
+                    {% if form.full_name.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        {% for error in form.full_name.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">آدرس ایمیل</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        {% for error in form.email.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.subject.id_for_label }}">موضوع</label>
+                    {{ form.subject }}
+                    {% if form.subject.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        {% for error in form.subject.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.message.id_for_label }}">پیام شما</label>
+                    {{ form.message }}
+                    {% if form.message.errors %}
+                    <div class="error-message">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        {% for error in form.message.errors %}
+                        <span>{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i>
+                        <span>ارسال پیام</span>
+                    </button>
+
+                    <a href="{% url 'index-page' %}" class="btn btn-secondary">
+                        <i class="fas fa-home"></i>
+                        <span>بازگشت به خانه</span>
+                    </a>
+                </div>
+            </form>
+
+            {% if form_info %}
+            <div class="contact-methods" style="margin-top: 3rem;">
+                <div class="contact-method" style="display: inline-flex; background: rgba(255,255,255,0.05); padding: 1rem 1.5rem; border-radius: 10px; margin: 0 0.5rem;">
+                    <i class="fas fa-envelope" style="color: var(--accent-color); font-size: 1.5rem;"></i>
+                    <div class="contact-info" style="margin-right: 1rem;">
+                        <h4 style="color: white; margin-bottom: 0.3rem;">ایمیل پشتیبانی</h4>
+                        <p style="color: rgba(255,255,255,0.7);">{{ form_info.email }}</p>
+                    </div>
+                </div>
+
+                <div class="contact-method" style="display: inline-flex; background: rgba(255,255,255,0.05); padding: 1rem 1.5rem; border-radius: 10px; margin: 0 0.5rem;">
+                    <i class="fas fa-phone-alt" style="color: var(--accent-color); font-size: 1.5rem;"></i>
+                    <div class="contact-info" style="margin-right: 1rem;">
+                        <h4 style="color: white; margin-bottom: 0.3rem;">تلفن تماس</h4>
+                        <p style="color: rgba(255,255,255,0.7);">{{ form_info.fax }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% endblock %}

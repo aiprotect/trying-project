@@ -1,0 +1,119 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>فروشگاه اینترنتی</title>
+    <link rel="stylesheet" href="/static/css/header_site.css">
+</head>
+
+<body>
+
+
+    <header class="main-header">
+        <div class="container">
+            <div class="header-top">
+                <!-- لوگو -->
+                <a href="/" class="logo">
+                    <img src="logo.png" alt="لوگو فروشگاه">
+                    <span>فروشگاه آنلاین</span>
+                </a>
+
+                <!-- جستجو -->
+                <div class="search-container">
+                    <div class="search-box">
+                        <form action="/products" method="get">
+                            <input type="text" class="search-input" placeholder="جستجوی محصولات..." name="q"
+                                autocomplete="off">
+                            <button type="submit" class="search-btn">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- بخش کاربر و اقدامات -->
+                <div class="user-section">
+                    <!-- حالت کاربر وارد شده یا نشده -->
+                    {% if user.is_authenticated %}
+                    <div class="user-profile">
+                        <!-- نمایش تصویر پروفایل -->
+                        <a href="{% url 'dashboard'%}">
+                            <img src="{% if user.profile_image %}{{ user.profile_image.url }}{% else %}{% static 'images/logo-user.jpg' %}{% endif %}"
+                                alt="پروفایل کاربر" class="user-avatar">
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="auth-buttons">
+                        <a href="/login" class="auth-button login-btn">
+                            <i class="fas fa-sign-in-alt"></i>
+                            ورود
+                        </a>
+                        <a href="/register" class="auth-button register-btn">
+                            <i class="fas fa-user-plus"></i>
+                            ثبت نام
+                        </a>
+                    </div>
+                    {% endif %}
+
+                    <!-- آیکون‌های اقدامات -->
+                    <div class="action-icons">
+                        <a href="/cart" class="action-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                            <span class="badge">3</span>
+                        </a>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- منوی اصلی -->
+            <nav class="main-nav">
+                <ul class="nav-list">
+                    <li>
+                        <a href="{% url 'index-page'%}" class="nav-link {% if request.resolver_match.url_name == 'index-page' %}active{% endif %}">
+                            <i class="fas fa-home"></i>
+                            خانه
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'product-list' %}" class="nav-link {% if request.resolver_match.url_name == 'product-list' %}active{% endif %}">
+                            <i class="fas fa-store"></i>
+                            فروشگاه
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/blog" class="nav-link">
+                            <i class="fas fa-newspaper"></i>
+                            وبلاگ
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'about-us-page'%}" class="nav-link {% if request.resolver_match.url_name == 'about-us-page' %}active{% endif %}">
+                            <i class="fas fa-info-circle"></i>
+                            درباره ما
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'contact-us-page'%}" class="nav-link {% if request.resolver_match.url_name == 'contact-us-page' %}active{% endif %}">
+                            <i class="fas fa-headset"></i>
+                            تماس با ما
+                        </a>
+                    </li>
+
+    <!-- سایر آیتم‌های منو -->
+    <li>
+<a href="{% url 'chat-page' %}" class="nav-link {% if request.resolver_match.url_name == 'chat-page' %}active{% endif %}">            <i class="fas fa-comment"></i>
+            چت
+        </a>
+    </li>
+
+                </ul>
+            </nav>
+        </div>
+    </header>
+</body>
+
+</html>

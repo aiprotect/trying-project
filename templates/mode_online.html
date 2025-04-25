@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Online Status</title>
+</head>
+<body>
+    {% block content %}{% endblock %}
+
+    <script>
+        const socket = new WebSocket(
+            'ws://' + window.location.host + '/ws/online/'
+        );
+
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            if(data.type === 'online_users') {
+                updateOnlineUsers(data.users);
+            }
+        };
+
+        function updateOnlineUsers(users) {
+            const onlineList = document.getElementById('online-users');
+            if(onlineList) {
+                onlineList.innerHTML = users.map(user =>
+                    `<li>${user} <span class="online-dot"></span></li>`
+                ).join('');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,521 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+پنل کاربری | فروشگاه اینترنتی
+{% endblock %}
+
+{% block header %}{% endblock %}
+{% block footer %}{% endblock %}
+
+<!-- imporing css -->
+{% block extra_css %}
+<link href="{% static '/css/all.min.css' %}" rel="stylesheet">
+<link href="{% static 'css/user_panel_style.css' %}" rel="stylesheet">
+<link href="{% static 'css/mode_panel.css' %}" rel="stylesheet">
+{% endblock %}
+<!-- importing js -->
+{% block  extra_js%}
+<script src="/static/js/mode_panel.js"></script>
+{% endblock %}
+<!-- Content -->
+{% block content %}
+<aside class="dashboard-sidebar">
+    <div class="sidebar-header">
+        <!-- دکمه تغییر حالت -->
+        <div class="theme-toggle-container">
+            <button id="theme-toggle" class="theme-toggle-btn" title="تغییر حالت">
+                <i class="fas fa-moon"></i>
+                <i class="fas fa-sun"></i>
+            </button>
+        </div>
+
+        <div class="user-profile">
+            <!-- تصویر پروفایل -->
+            <img src="{% if user.profile_image %}{{ user.profile_image.url }}{% else %}{% static 'images/logo-user.jpg' %}{% endif %}"
+                alt="پروفایل کاربر" class="user-avatar">
+            
+            <!-- اطلاعات کاربر - حالا داخل div.user-profile قرار می‌گیرد -->
+            <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+            <span class="user-email">{{ user.email }}</span>
+        </div>
+    </div>
+    
+    <!-- بقیه کدهای سایدبار -->
+
+
+    <div class="sidebar-menu">
+        <!-- بخش حساب کاربری -->
+        <div class="menu-category">
+            <i class="fas fa-user-circle"></i>
+            حساب کاربری
+        </div>
+        <a href="#" class="menu-item active">
+            <i class="fas fa-tachometer-alt menu-icon"></i>
+            <span class="menu-text">داشبورد</span>
+        </a>
+        <a href="{% url 'dashboard' %}" class="menu-item">
+            <i class="fas fa-user-edit menu-icon"></i>
+            <span class="menu-text">ویرایش پروفایل</span>
+        </a>
+        <a href="{% if request.user.is_superuser %}{% url 'superuser-change-password' %}{% else %}{% url 'mode-forgot-pass' %}{% endif %}" class="menu-item">
+            <i class="fas fa-lock menu-icon"></i>
+            <span class="menu-text">تغییر رمز عبور</span>
+        </a>
+
+        <!-- بخش خریدها -->
+        <div class="menu-category">
+            <i class="fas fa-shopping-bag"></i>
+            خریدهای من
+        </div>
+        <a href="#" class="menu-item">
+            <i class="fas fa-shopping-cart menu-icon"></i>
+            <span class="menu-text">سفارشات</span>
+            <span class="menu-badge">۳ جدید</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-exchange-alt menu-icon"></i>
+            <span class="menu-text">مرجوعی‌ها</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-map-marker-alt menu-icon"></i>
+            <span class="menu-text">آدرس‌ها</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="far fa-credit-card menu-icon"></i>
+            <span class="menu-text">کارت‌های بانکی</span>
+        </a>
+
+        <!-- بخش لیست‌ها -->
+        <div class="menu-category">
+            <i class="fas fa-list"></i>
+            لیست‌های من
+        </div>
+        <a href="#" class="menu-item">
+            <i class="fas fa-heart menu-icon"></i>
+            <span class="menu-text">لیست علاقه‌مندی‌ها</span>
+            <span class="menu-badge">۱۲</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-history menu-icon"></i>
+            <span class="menu-text">مشاهده‌های اخیر</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-bell menu-icon"></i>
+            <span class="menu-text">هشدارهای قیمت</span>
+        </a>
+
+        <!-- بخش ارتباطات -->
+        <div class="menu-category">
+            <i class="fas fa-comments"></i>
+            ارتباطات
+        </div>
+        <a href="#" class="menu-item">
+            <i class="far fa-comment-dots menu-icon"></i>
+            <span class="menu-text">نظرات و نقدها</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="far fa-question-circle menu-icon"></i>
+            <span class="menu-text">پرسش‌های من</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-headset menu-icon"></i>
+            <span class="menu-text">پشتیبانی</span>
+        </a>
+
+        <!-- بخش مالی -->
+        <div class="menu-category">
+            <i class="fas fa-wallet"></i>
+            مالی و کیف پول
+        </div>
+        <a href="#" class="menu-item">
+            <i class="fas fa-coins menu-icon"></i>
+            <span class="menu-text">کیف پول</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-gift menu-icon"></i>
+            <span class="menu-text">کارت هدیه</span>
+        </a>
+        <a href="#" class="menu-item">
+            <i class="fas fa-percentage menu-icon"></i>
+            <span class="menu-text">تخفیف‌ها</span>
+        </a>
+
+        <!-- بخش خروج -->
+        <div class="menu-category">
+            <i class="fas fa-sign-out-alt"></i>
+            خروج از سیستم
+        </div>
+        <a href="{% url 'logout-page' %}" class="menu-item">
+            <i class="fas fa-sign-out-alt menu-icon"></i>
+            <span class="menu-text">خروج از حساب</span>
+        </a>
+    </div>
+</aside>
+
+<!-- محتوای اصلی -->
+<main class="dashboard-content">
+    <!-- هدر دشبورد -->
+    <div class="dashboard-header">
+        <div class="page-title">
+            <h1>داشبورد کاربری</h1>
+            <p>به پنل کاربری خود خوش آمدید</p>
+        </div>
+
+        <div class="header-actions">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="جستجو در پنل کاربری...">
+            </div>
+
+            <div class="notification-btn">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge">۵</span>
+            </div>
+
+            <div class="notification-btn">
+                <i class="fas fa-envelope"></i>
+                <span class="notification-badge">۳</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- کارت‌های آماری -->
+    <div class="stats-grid">
+        <div class="stat-card orders">
+            <div class="stat-title">
+                <i class="fas fa-shopping-bag"></i>
+                سفارشات فعال
+            </div>
+            <div class="stat-value">۵</div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>۲۰٪ افزایش نسبت به ماه گذشته</span>
+            </div>
+        </div>
+
+        <div class="stat-card wishlist">
+            <div class="stat-title">
+                <i class="fas fa-heart"></i>
+                لیست علاقه‌مندی‌ها
+            </div>
+            <div class="stat-value">۱۲</div>
+            <div class="stat-change negative">
+                <i class="fas fa-arrow-down"></i>
+                <span>۵٪ کاهش نسبت به ماه گذشته</span>
+            </div>
+        </div>
+
+        <div class="stat-card messages">
+            <div class="stat-title">
+                <i class="fas fa-comment-alt"></i>
+                پیام‌های خوانده نشده
+            </div>
+            <div class="stat-value">۳</div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>۲ پیام جدید</span>
+            </div>
+        </div>
+
+        <div class="stat-card credits">
+            <div class="stat-title">
+                <i class="fas fa-wallet"></i>
+                اعتبار کیف پول
+            </div>
+            <div class="stat-value">۱,۲۵۰,۰۰۰ تومان</div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                <span>۵۰۰,۰۰۰ تومان افزایش</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- سفارشات اخیر -->
+    <div class="recent-orders">
+        <div class="section-header">
+            <h2 class="section-title">سفارشات اخیر شما</h2>
+            <a href="#" class="section-link">
+                مشاهده همه سفارشات
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="orders-table">
+                <thead>
+                    <tr>
+                        <th>شماره سفارش</th>
+                        <th>تاریخ سفارش</th>
+                        <th>مبلغ کل</th>
+                        <th>وضعیت پرداخت</th>
+                        <th>وضعیت سفارش</th>
+                        <th>عملیات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>#۱۲۵۴۷۸</td>
+                        <td>۱۴۰۲/۰۵/۱۵</td>
+                        <td>۳,۲۵۰,۰۰۰ تومان</td>
+                        <td><span class="order-status status-delivered">پرداخت شده</span></td>
+                        <td><span class="order-status status-delivered">تحویل داده شده</span></td>
+                        <td><a href="#" class="action-link">مشاهده</a></td>
+                    </tr>
+                    <tr>
+                        <td>#۱۲۵۴۷۷</td>
+                        <td>۱۴۰۲/۰۵/۱۲</td>
+                        <td>۱,۸۵۰,۰۰۰ تومان</td>
+                        <td><span class="order-status status-delivered">پرداخت شده</span></td>
+                        <td><span class="order-status status-shipped">در حال ارسال</span></td>
+                        <td><a href="#" class="action-link">پیگیری</a></td>
+                    </tr>
+                    <tr>
+                        <td>#۱۲۵۴۷۶</td>
+                        <td>۱۴۰۲/۰۵/۱۰</td>
+                        <td>۵,۳۴۰,۰۰۰ تومان</td>
+                        <td><span class="order-status status-pending">در انتظار پرداخت</span></td>
+                        <td><span class="order-status status-pending">در انتظار پرداخت</span></td>
+                        <td><a href="#" class="action-link">پرداخت</a></td>
+                    </tr>
+                    <tr>
+                        <td>#۱۲۵۴۷۵</td>
+                        <td>۱۴۰۲/۰۵/۰۸</td>
+                        <td>۲,۷۲۰,۰۰۰ تومان</td>
+                        <td><span class="order-status status-cancelled">لغو شده</span></td>
+                        <td><span class="order-status status-cancelled">لغو شده</span></td>
+                        <td><a href="#" class="action-link">جزئیات</a></td>
+                    </tr>
+                    <tr>
+                        <td>#۱۲۵۴۷۴</td>
+                        <td>۱۴۰۲/۰۵/۰۵</td>
+                        <td>۱,۱۵۰,۰۰۰ تومان</td>
+                        <td><span class="order-status status-delivered">پرداخت شده</span></td>
+                        <td><span class="order-status status-returned">مرجوع شده</span></td>
+                        <td><a href="#" class="action-link">مشاهده</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- محصولات پیشنهادی -->
+    <div class="recent-orders">
+        <div class="section-header">
+            <h2 class="section-title">پیشنهادهای ویژه برای شما</h2>
+            <a href="#" class="section-link">
+                مشاهده همه پیشنهادها
+                <i class="fas fa-chevron-left"></i>
+            </a>
+        </div>
+
+        <div class="products-grid">
+            <div class="product-card">
+                <span class="product-badge">۲۳٪ تخفیف</span>
+                <div class="product-image">
+                    <img src="{% static 'images/download.jpg' %}" alt="محصول">
+                    <div class="product-actions">
+                        <div class="action-btn">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">گوشی موبایل سامسونگ مدل Galaxy S23 Ultra دو سیم کارت</h3>
+                    <div class="product-price">
+                        <div>
+                            <span class="current-price">۴۸,۹۹۰,۰۰۰ تومان</span>
+                            <span class="old-price">۶۳,۵۰۰,۰۰۰ تومان</span>
+                        </div>
+                        <button class="add-to-cart">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <span class="product-badge">۱۵٪ تخفیف</span>
+                <div class="product-image">
+                    <img src="{% static 'images/download.jpg' %}" alt="محصول">
+                    <div class="product-actions">
+                        <div class="action-btn">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">لپ‌تاپ اپل مک‌بوک پرو ۱۴ اینچ M2 Pro 1TB</h3>
+                    <div class="product-price">
+                        <div>
+                            <span class="current-price">۱۲۲,۹۹۰,۰۰۰ تومان</span>
+                            <span class="old-price">۱۴۴,۵۰۰,۰۰۰ تومان</span>
+                        </div>
+                        <button class="add-to-cart">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <span class="product-badge">۱۰٪ تخفیف</span>
+                <div class="product-image">
+                    <img src="{% static 'images/product3.jpg' %}" alt="محصول">
+                    <div class="product-actions">
+                        <div class="action-btn">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">هدفون بی‌سیم سونی مدل WH-1000XM5</h3>
+                    <div class="product-price">
+                        <div>
+                            <span class="current-price">۸,۲۹۰,۰۰۰ تومان</span>
+                            <span class="old-price">۹,۲۰۰,۰۰۰ تومان</span>
+                        </div>
+                        <button class="add-to-cart">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <span class="product-badge">۳۰٪ تخفیف</span>
+                <div class="product-image">
+                    <img src="{% static 'images/product4.jpg' %}" alt="محصول">
+                    <div class="product-actions">
+                        <div class="action-btn">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="action-btn">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-info">
+                    <h3 class="product-title">دوربین کانن مدل EOS R6 Mark II</h3>
+                    <div class="product-price">
+                        <div>
+                            <span class="current-price">۸۹,۹۹۰,۰۰۰ تومان</span>
+                            <span class="old-price">۱۲۸,۵۰۰,۰۰۰ تومان</span>
+                        </div>
+                        <button class="add-to-cart">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- اطلاعیه‌ها و پیام‌ها -->
+    <div class="notifications-section">
+        <div class="notification-card">
+            <div class="section-header">
+                <h2 class="section-title">اطلاعیه‌ها</h2>
+                <a href="#" class="section-link">
+                    مشاهده همه
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </div>
+
+            <div class="notification-item">
+                <div class="notification-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="notification-content">
+                    <h3 class="notification-title">سفارش شما تحویل داده شد</h3>
+                    <p class="notification-time">۲ ساعت پیش</p>
+                </div>
+            </div>
+
+            <div class="notification-item">
+                <div class="notification-icon">
+                    <i class="fas fa-tag"></i>
+                </div>
+                <div class="notification-content">
+                    <h3 class="notification-title">تخفیف ویژه برای محصولات مورد علاقه شما</h3>
+                    <p class="notification-time">۱ روز پیش</p>
+                </div>
+            </div>
+
+            <div class="notification-item">
+                <div class="notification-icon">
+                    <i class="fas fa-credit-card"></i>
+                </div>
+                <div class="notification-content">
+                    <h3 class="notification-title">شارژ کیف پول شما با موفقیت انجام شد</h3>
+                    <p class="notification-time">۲ روز پیش</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification-card">
+            <div class="section-header">
+                <h2 class="section-title">پیام‌های پشتیبانی</h2>
+                <a href="#" class="section-link">
+                    مشاهده همه
+                    <i class="fas fa-chevron-left"></i>
+                </a>
+            </div>
+
+            <div class="notification-item">
+                <div class="notification-icon">
+                    <i class="fas fa-comment-dots"></i>
+                </div>
+                <div class="notification-content">
+                    <h3 class="notification-title">پاسخ به درخواست مرجوعی شما</h3>
+                    <p class="notification-time">۳ ساعت پیش</p>
+                </div>
+            </div>
+
+            <div class="notification-item">
+                <div class="notification-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <div class="notification-content">
+                    <h3 class="notification-title">پاسخ به پرسش شما درباره محصول</h3>
+                    <p class="notification-time">۱ روز پیش</p>
+                </div>
+            </div>
+
+            <div class="notification-item">
+                <div class="notification-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="notification-content">
+                    <h3 class="notification-title">درخواست شما تأیید شد</h3>
+                    <p class="notification-time">۳ روز پیش</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+</div>
+
+{% endblock %}
+

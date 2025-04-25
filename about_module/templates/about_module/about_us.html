@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="/static/css/about_us.css">
+{% endblock %}
+
+{% block title %}
+درباره ما | فروشگاه اینترنتی
+{% endblock %}
+
+{% block content %}
+
+
+<div class="about-container">
+    <!-- هدر صفحه -->
+    <div class="about-header">
+        <h1 class="about-title">درباره <span>ما</span></h1>
+        <div class="about-breadcrumb">
+            <a href="/">
+                <i class="fas fa-home"></i>
+                خانه
+            </a>
+            <span class="breadcrumb-separator">/</span>
+            <span>درباره ما</span>
+        </div>
+    </div>
+
+    <!-- محتوای اصلی -->
+    <div class="about-content">
+        <!-- بخش داستان شرکت -->
+        <section class="about-story">
+            <h2><i class="fas fa-history"></i>داستان ما</h2>
+            <p> {{ about.text_about_us }}</p>
+        </section>
+
+        <!-- تصویر -->
+        <div class="about-image">
+            {% if about.image_us.url %}
+            <img src="{{ about.image_us.url }}" alt="تیم ما">
+            
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- بخش آمار -->
+    <div class="about-stats">
+        <div class="stat-item">
+            <div class="stat-number">۱۲+</div>
+            <div class="stat-label">سال تجربه</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">۵۰۰+</div>
+            <div class="stat-label">مشتری راضی</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">۵۰+</div>
+            <div class="stat-label">همکار</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-number">۱۰۰%</div>
+            <div class="stat-label">تضمین کیفیت</div>
+        </div>
+    </div>
+
+    <!-- بخش تیم -->
+    <section class="team-section">
+        <h2 class="section-title">تیم ما</h2>
+        <p>تیم متخصص و با انگیزه ما آماده خدمت‌رسانی به شماست</p>
+        
+        <div class="team-members">
+            <div class="team-member">
+                <div class="member-image">
+                    <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a" alt="مدیر عامل">
+                </div>
+                <div class="member-info">
+                    <h3>علی محمدی</h3>
+                    <p>مدیر عامل و بنیانگذار</p>
+                </div>
+            </div>
+            
+            <div class="team-member">
+                <div class="member-image">
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2" alt="مدیر فروش">
+                </div>
+                <div class="member-info">
+                    <h3>فاطمه زاهدی</h3>
+                    <p>مدیر فروش</p>
+                </div>
+            </div>
+            
+            <div class="team-member">
+                <div class="member-image">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d" alt="توسعه دهنده">
+                </div>
+                <div class="member-info">
+                    <h3>رضا حسینی</h3>
+                    <p>توسعه دهنده ارشد</p>
+                </div>
+            </div>
+            
+            <div class="team-member">
+                <div class="member-image">
+                    <img src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1" alt="پشتیبانی">
+                </div>
+                <div class="member-info">
+                    <h3>سارا کریمی</h3>
+                    <p>مدیر پشتیبانی</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- بخش ارزش‌ها -->
+    <section class="values-section">
+        <h2 class="section-title">ارزش‌های ما</h2>
+        <p>این اصول راهنمای تمام فعالیت‌های ما هستند</p>
+        
+        <div class="values-grid">
+            <div class="value-card">
+                <h3><i class="fas fa-star"></i>کیفیت</h3>
+                <p>ما به کیفیت خدمات و محصولات خود افتخار می‌کنیم و هیچگاه از استانداردهای بالا کوتاه نمی‌آییم.</p>
+            </div>
+            
+            <div class="value-card">
+                <h3><i class="fas fa-handshake"></i>صداقت</h3>
+                <p>صداقت و شفافیت در تمام تعاملات با مشتریان و همکاران برای ما از اهمیت بالایی برخوردار است.</p>
+            </div>
+            
+            <div class="value-card">
+                <h3><i class="fas fa-lightbulb"></i>نوآوری</h3>
+                <p>ما همیشه به دنبال راه‌های جدید و خلاقانه برای بهبود خدمات خود هستیم.</p>
+            </div>
+            
+            <div class="value-card">
+                <h3><i class="fas fa-users"></i>مشتری مداری</h3>
+                <p>رضایت مشتری برای ما در اولویت است و تمام تلاش خود را برای جلب رضایت آن‌ها می‌کنیم.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

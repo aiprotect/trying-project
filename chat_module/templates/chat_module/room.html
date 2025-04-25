@@ -1,0 +1,33 @@
+<!-- chat/templates/chat/room.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat</title>
+</head>
+<body>
+    <div id="chat-log"></div>
+    <input id="chat-message" type="text">
+    <button onclick="sendMessage()">ارسال</button>
+
+    <script>
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/chat/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            document.querySelector('#chat-log').innerHTML +=
+                `<p>${data.sender}: ${data.message}</p>`;
+        };
+
+        function sendMessage() {
+            const message = document.querySelector('#chat-message').value;
+            chatSocket.send(JSON.stringify({
+                'message': message
+            }));
+            document.querySelector('#chat-message').value = '';
+        }
+    </script>
+</body>
+</html>

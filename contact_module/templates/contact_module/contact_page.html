@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+تماس با ما | فروشگاه اینترنتی
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/contact.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="contact-container">
+    <!-- هدر صفحه -->
+    <div class="contact-header">
+        <h1 class="contact-title">تماس با <span>ما</span></h1>
+        <div class="contact-breadcrumb">
+            <a href="/">
+                <i class="fas fa-home"></i>
+                خانه
+            </a>
+            <span class="breadcrumb-separator">/</span>
+            <span>تماس با ما</span>
+        </div>
+    </div>
+
+    <!-- محتوای اصلی -->
+    <div class="contact-content">
+        <!-- بخش فرم تماس -->
+        <section class="contact-form-section">
+            <h2 class="form-title">
+                <i class="fas fa-paper-plane"></i>
+                پیام خود را ارسال کنید
+            </h2>
+
+            <div class="status alert alert-success" style="display: none"></div>
+
+            <form id="main-contact-form" class="contact-form" enctype="multipart/form-data"
+                action="{% url 'contact-us-page' %}" method="post" novalidate>
+                {% csrf_token %}
+
+                <div class="row">
+                    <div class="col-md-6 form-group">
+                        <input type="email" name="email" class="form-control" placeholder="ایمیل شما *" required>
+                        {% if contact_form.email.errors %}
+                        <div class="text-danger">{{ contact_form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="col-md-6 form-group">
+                        <input type="text" name="full_name" class="form-control" placeholder="نام کامل شما *" required>
+                        {% if contact_form.full_name.errors %}
+                        <div class="text-danger">{{ contact_form.full_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <input type="text" name="subject" class="form-control" placeholder="موضوع *" required>
+                    {% if contact_form.subject.errors %}
+                    <div class="text-danger">{{ contact_form.subject.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <textarea name="message" class="form-control" rows="6" placeholder="متن پیام *" required></textarea>
+                    {% if contact_form.message.errors %}
+                    <div class="text-danger">{{ contact_form.message.errors }}</div>
+                    {% endif %}
+
+                    <div class="file-upload-wrapper">
+                        <label for="image_profile" class="custom-file-upload">
+                            <i class="fas fa-file-upload"></i> انتخاب فایل (اختیاری)
+                        </label>
+                        <input type="file" id="image_profile" name="image" accept="image/jpeg,image/png,image/gif,image/webp" style="display: none;">
+                        <span id="file-name" style="margin-right: 10px;"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-paper-plane"></i>
+                    ارسال پیام
+                </button>
+            </form>
+        </section>
+
+        <!-- بخش اطلاعات تماس -->
+        <section class="contact-info-section">
+            <h2 class="info-title">اطلاعات تماس</h2>
+
+            <div class="contact-info">
+                <address>
+                    <p>
+                        <i class="fas fa-building"></i>
+                        <span class="info-label">آدرس:</span>
+                        {{ about_us.address }}
+                    </p>
+
+                    <p>
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span class="info-label">شهر:</span>
+                        {{ about_us.city }}
+                    </p>
+
+                    <p>
+                        <i class="fas fa-phone"></i>
+                        <span class="info-label">تلفن:</span>
+                        {{ about_us.phone }}
+                    </p>
+
+                    <p>
+                        <i class="fas fa-fax"></i>
+                        <span class="info-label">فکس:</span>
+                        {{ about_us.fax }}
+                    </p>
+
+                    <p>
+                        <i class="fas fa-envelope"></i>
+                        <span class="info-label">ایمیل:</span>
+                        {{ about_us.email }}
+                    </p>
+                </address>
+
+                <div class="social-links">
+                    <a href="{{ about_us.telegram|default:'#' }}" class="" title="تلگرام">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                    <a href="{{ about_us.instagram|default:'#' }}" class="" title="اینستاگرام">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                    <a href="{{ about_us.whatsapp|default:'#' }}" class="" title="واتساپ">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="{{ about_us.twitter|default:'#' }}" class="" title="توییتر">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- ابتدا کتابخانه‌های مورد نیاز -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<!-- سپس اسکریپت اختصاصی -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const contactForm = document.getElementById('main-contact-form');
+    const fileInput = document.getElementById('image_profile');
+    const fileNameSpan = document.getElementById('file-name');
+    const validImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+    // نمایش نام فایل انتخاب شده
+    if (fileInput) {
+        fileInput.addEventListener('change', function() {
+            if (this.files && this.files.length > 0) {
+                const file = this.files[0];
+
+                // اعتبارسنجی نوع فایل
+                if (!validImageTypes.includes(file.type)) {
+                    showError('لطفاً فقط تصاویر (JPG, PNG, GIF, WEBP) انتخاب کنید');
+                    this.value = '';
+                    fileNameSpan.textContent = '';
+                    return;
+                }
+
+                // اعتبارسنجی حجم فایل (مثلاً کمتر از 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    showError('حجم فایل باید کمتر از 5MB باشد');
+                    this.value = '';
+                    fileNameSpan.textContent = '';
+                    return;
+                }
+
+                fileNameSpan.textContent = file.name;
+            }
+        });
+    }
+
+    // مدیریت ارسال فرم
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            let hasError = false;
+
+            // اعتبارسنجی تمام فیلدهای ضروری
+            const requiredFields = contactForm.querySelectorAll('[required]');
+            requiredFields.forEach(field => {
+                if (!field.value.trim()) {
+                    field.classList.add('is-invalid');
+                    hasError = true;
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+
+            // اعتبارسنجی خاص برای ایمیل
+            const emailField = contactForm.querySelector('[name="email"]');
+            if (emailField && !isValidEmail(emailField.value.trim())) {
+                emailField.classList.add('is-invalid');
+                hasError = true;
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                showError('لطفاً تمام فیلدهای ضروری را به درستی پر کنید');
+                return;
+            }
+
+            // بقیه کدهای ارسال فرم...
+        });
+    }
+
+    // تابع اعتبارسنجی ایمیل
+    function isValidEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    }
+
+    // تابع نمایش خطا
+    function showError(message) {
+        // ابتدا بررسی کنید اگر پیغام خطا از قبل نمایش داده شده، آن را حذف کنید
+        const existingAlert = document.querySelector('.alert.alert-danger');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+
+        // ایجاد عنصر خطا
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'alert alert-danger';
+        errorDiv.innerHTML = message;
+
+        // درج پیغام خطا در بالای فرم
+        const formTitle = document.querySelector('.form-title');
+        if (formTitle) {
+            formTitle.insertAdjacentElement('afterend', errorDiv);
+        }
+
+        // اسکرول به بالای فرم
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block header%}{% endblock%}
+{% block footer%}{% endblock%}
+{% block extra_css %}
+<style>
+    /* فونت و تنظیمات پایه */
+    @import url('https://cdn.jsdelivr.net/gh/rastikerdar/vazir-font@v30.1.0/dist/font-face.css');
+    @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+    
+    :root {
+        --primary: #4f46e5;
+        --primary-dark: #4338ca;
+        --danger: #ef4444;
+        --light: #f9fafb;
+        --dark: #1f2937;
+        --gray: #6b7280;
+    }
+    
+    body {
+        font-family: 'Vazirmatn', sans-serif;
+        background-color: #f8f9fa;
+        line-height: 1.6;
+        color: var(--dark);
+        direction: rtl;
+    }
+    
+    /* کارت خطا */
+    .error-card {
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .error-card:hover {
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        transform: translateY(-5px);
+    }
+    
+    /* هدر کارت */
+    .error-header {
+        padding: 2rem 1.5rem 1rem;
+    }
+    
+    .error-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: var(--danger);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    
+    /* بدنه کارت */
+    .error-body {
+        padding: 1.5rem;
+    }
+    
+    /* پیام خطا */
+    .error-message {
+        background-color: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.2);
+        border-radius: 0.5rem;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .error-message h4 {
+        color: var(--danger);
+        font-size: 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .error-code {
+        font-family: monospace;
+        background-color: rgba(31, 41, 55, 0.1);
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        font-size: 0.9rem;
+    }
+    
+    /* دکمه بازگشت */
+    .home-btn {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        color: white;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .home-btn:hover {
+        background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* انیمیشن */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .error-card {
+        animation: fadeIn 0.5s ease-out;
+    }
+    
+    /* رسپانسیو */
+    @media (max-width: 768px) {
+        .error-card {
+            border-radius: 0;
+            box-shadow: none;
+        }
+        
+        .error-header {
+            padding: 1.5rem 1rem 0.5rem;
+        }
+        
+        .error-title {
+            font-size: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card shadow-lg error-card">
+        <div class="card-body text-center">
+            <div class="error-header">
+                <h1 class="error-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    خطای دسترسی
+                </h1>
+            </div>
+            
+            <div class="error-message">
+                <h4>{{ message }}</h4>
+                <p class="mb-0">کد خطا: <span class="error-code">{{ status_code }}</span></p>
+            </div>
+            
+            <a href="/" class="home-btn">
+                <i class="fas fa-home"></i> بازگشت به صفحه اصلی
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
